@@ -1,0 +1,16 @@
+# Configuración local con credenciales reales
+public_html/api/config.local.php
+
+# Archivos subidos por los usuarios y miniaturas generadas
+public_html/storage/uploads/*
+!public_html/storage/uploads/.htaccess
+public_html/storage/thumbs/*
+!public_html/storage/thumbs/.htaccess
+
+# Sesiones de PHP (propias, no el /tmp compartido del hosting)
+public_html/storage/sessions/*
+!public_html/storage/sessions/.htaccess
+
+*.log
+.DS_Store
+.vscode/
