@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Router para el servidor embebido de PHP (desarrollo).
  * Reemplaza lo que en producción hace el .htaccess de Apache.
  *
- *   php -S localhost:8000 -t public_html server.php
+ *   php -S 127.0.0.1:8001 -t public_html server.php
  */
 
 $root = __DIR__ . '/public_html';

@@ -39,7 +39,7 @@ final class Emails
 
     public static function welcome(array $user): bool
     {
-        $content = self::heading('¡Bienvenido a Jetcopy!')
+        $content = self::heading('¡Bienvenido a PDF Color!')
             . self::paragraph('Hola ' . self::e($user['name']) . ', tu cuenta ya está creada.')
             . self::paragraph('Desde ahora podés subir tus archivos, armar tu pedido de impresión y seguir su estado desde la web.')
             . self::dataTable(['Email de ingreso' => self::e($user['email'])])
@@ -48,7 +48,7 @@ final class Emails
 
         return Mailer::send(
             $user['email'],
-            '¡Bienvenido a Jetcopy!',
+            '¡Bienvenido a PDF Color!',
             self::layout($content, 'Tu cuenta ya está creada. Ya podés hacer tu primer pedido.'),
         );
     }
@@ -62,7 +62,7 @@ final class Emails
 
         return Mailer::send(
             $user['email'],
-            'Restablecer tu contraseña · Jetcopy',
+            'Restablecer tu contraseña · PDF Color',
             self::layout($content, 'Usá este link para elegir una contraseña nueva. Vence en 1 hora.'),
         );
     }
@@ -85,7 +85,7 @@ final class Emails
 
         return Mailer::send(
             $order['customer_email'],
-            'Recibimos tu pedido #' . (int) $order['id'] . ' · Jetcopy',
+            'Recibimos tu pedido #' . (int) $order['id'] . ' · PDF Color',
             self::layout($content, 'Total $ ' . number_format((float) $order['total'], 2, ',', '.') . '. Ya lo estamos preparando.'),
         );
     }
@@ -118,7 +118,7 @@ final class Emails
 
         return Mailer::send(
             $order['customer_email'],
-            'Tu pedido #' . (int) $order['id'] . ' está listo para retirar · Jetcopy',
+            'Tu pedido #' . (int) $order['id'] . ' está listo para retirar · PDF Color',
             self::layout($content, 'Ya podés pasar a buscar tu pedido.'),
         );
     }
@@ -301,7 +301,7 @@ final class Emails
             <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
-            <title>Jetcopy</title>
+            <title>PDF Color</title>
             </head>
             <body style="margin:0;padding:0;background:#ececef">
             <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ececef;font-size:1px;line-height:1px">{$safePreheader}</div>
@@ -309,7 +309,7 @@ final class Emails
             <tr><td align="center" style="padding:32px 12px">
             <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px">
             <tr><td align="center" bgcolor="#0b0b0d" style="padding:22px 24px;background:#0b0b0d;border-radius:12px 12px 0 0">
-            <a href="{$appUrl}" style="text-decoration:none"><img src="{$logo}" width="190" alt="Jetcopy" style="display:block;width:190px;max-width:100%;height:auto;border:0;color:#ffffff;font-size:22px;font-weight:700;{$font}" /></a>
+            <a href="{$appUrl}" style="text-decoration:none"><img src="{$logo}" width="190" alt="PDF Color" style="display:block;width:190px;max-width:100%;height:auto;border:0;color:#ffffff;font-size:22px;font-weight:700;{$font}" /></a>
             </td></tr>
             <tr><td bgcolor="#ffffff" style="padding:32px 32px 28px;background:#ffffff;border:1px solid #e4e4e7;border-top:0;border-radius:0 0 12px 12px">
             {$content}
@@ -327,7 +327,7 @@ final class Emails
 
     private static function footer(): string
     {
-        $lines = ['<strong style="color:#52525b">Jetcopy · Centro de copiado</strong>'];
+        $lines = ['<strong style="color:#52525b">PDF Color · Centro de copiado</strong>'];
 
         $address = (string) Config::get('contact.address', '');
         $hours = (string) Config::get('contact.hours', '');

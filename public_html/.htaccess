@@ -22,7 +22,7 @@ DirectoryIndex index.html
   # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
   # Un solo dominio (sin www): las cookies de sesión son por host, así que quien
-  # navega en www.jetcopy.com.ar y vuelve de Mercado Pago a jetcopy.com.ar (la
+  # navega en www.pdfcolor.com.ar y vuelve de Mercado Pago a pdfcolor.com.ar (la
   # app.url de la config) aparece deslogueado.
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]

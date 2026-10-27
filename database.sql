@@ -1,4 +1,4 @@
--- Jetcopy · esquema completo
+-- PDF Color · esquema completo
 -- Importar desde phpMyAdmin sobre una base vacía.
 
 SET NAMES utf8mb4;

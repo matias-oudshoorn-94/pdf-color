@@ -1,7 +1,7 @@
 {
-  "name": "jet-copy",
+  "name": "pdf-color",
   "version": "1.0.0",
-  "description": "Jetcopy - sistema de impresiones online (PHP + JS estático, sin build)",
+  "description": "PDF Color - sistema de impresiones online (PHP + JS estático, sin build)",
   "main": "index.html",
   "scripts": {
     "build": "echo \"No build required\"",

@@ -30,7 +30,7 @@ final class Mailer
         $port = (int) Config::get('mail.port', 465);
         $encryption = (string) Config::get('mail.encryption', 'ssl');
         $fromAddress = (string) Config::get('mail.from_address', $username) ?: $username;
-        $fromName = (string) Config::get('mail.from_name', 'Jetcopy');
+        $fromName = (string) Config::get('mail.from_name', 'PDF Color');
 
         $stream = null;
 
