@@ -1,0 +1,15 @@
+{
+  "name": "jet-copy",
+  "version": "1.0.0",
+  "description": "Jetcopy - sistema de impresiones online (PHP + JS estático, sin build)",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo \"No build required\"",
+    "start": "echo \"Server ready\"",
+    "test": "echo \"No tests\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {}
+}

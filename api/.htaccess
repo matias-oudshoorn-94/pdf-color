@@ -1,0 +1,9 @@
+# Todo lo que entra a /api lo maneja el front controller.
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]
+
+# El código fuente y la configuración nunca se sirven directamente.
+RedirectMatch 404 ^/api/(src|config(\.local)?\.php)
+
+php_flag display_errors off

@@ -1,0 +1,3 @@
+# Ningún archivo subido se sirve directamente: siempre pasa por la API.
+Require all denied
+Deny from all

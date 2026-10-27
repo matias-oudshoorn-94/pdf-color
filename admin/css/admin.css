@@ -1,0 +1,477 @@
+/* Panel de administración: layout propio, sin la imagen de fondo del sitio público. */
+
+.admin-body {
+  background: var(--bg);
+}
+
+.admin-body::before,
+.admin-body::after {
+  content: none;
+}
+
+/* ---------- Login ---------- */
+.admin-login {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  padding: 24px;
+}
+
+.admin-login__card {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: clamp(26px, 5vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.admin-login__head {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  text-align: center;
+}
+
+/* ---------- Estructura ---------- */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  min-height: 100dvh;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  padding: 22px 16px;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 8px;
+}
+
+.sidebar__tag {
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+.sidebar__nav {
+  display: grid;
+  gap: 2px;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: var(--text-2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.sidebar__link:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.sidebar__link[aria-current='page'] {
+  background: var(--surface-3);
+  color: var(--text);
+}
+
+.sidebar__count {
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--bg);
+  font-size: 0.72rem;
+  color: var(--text-3);
+}
+
+.sidebar__footer {
+  margin-top: auto;
+  display: grid;
+  gap: 10px;
+  padding-inline: 8px;
+  font-size: 0.82rem;
+  color: var(--text-3);
+}
+
+.admin-main {
+  min-width: 0;
+  padding: clamp(20px, 3vw, 34px);
+  display: grid;
+  gap: 22px;
+  align-content: start;
+}
+
+.admin-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.admin-head h1 {
+  font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+}
+
+/* Contador fijo de copias vendidas, visible en todas las secciones */
+.copies-sold {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.copies-sold__value {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.copies-sold__label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+/* ---------- Métricas ---------- */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+
+.metric {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.metric__value {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.metric__label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+/* ---------- Toolbar y tablas ---------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.toolbar .input,
+.toolbar .select {
+  max-width: 260px;
+}
+
+.toolbar__spacer {
+  flex: 1;
+}
+
+.toolbar__field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.select--sm {
+  padding: 7px 30px 7px 10px;
+  font-size: 0.84rem;
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+}
+
+.table th.th--check,
+.table td.th--check {
+  width: 1%;
+  padding-inline: 14px 4px;
+  text-align: center;
+}
+
+.bulk-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+.bulk-bar[hidden] {
+  display: none;
+}
+
+.bulk-bar__spacer {
+  flex: 1;
+}
+
+.th--sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--t-fast);
+}
+
+.th--sortable:hover {
+  color: var(--text);
+}
+
+.th__arrow {
+  margin-inline-start: 4px;
+  color: var(--text);
+}
+
+/* ---------- Paginador ---------- */
+.pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.pager[hidden] {
+  display: none;
+}
+
+.pager__info {
+  font-size: 0.82rem;
+  color: var(--text-3);
+}
+
+.pager__pages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pager__btn {
+  min-width: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 0.84rem;
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+
+.pager__btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--text-3);
+}
+
+.pager__btn.is-current {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.pager__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pager__gap {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+  color: var(--text-3);
+}
+
+.admin-body .card,
+.admin-body .table-wrap,
+.admin-body .input,
+.admin-body .select,
+.admin-body .textarea,
+.admin-body .toast {
+  background: var(--surface);
+  backdrop-filter: none;
+}
+
+.admin-body .table th {
+  background: var(--surface-2);
+}
+
+.table td .row {
+  gap: 6px;
+}
+
+.cell-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.row--clickable {
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+
+.row--clickable:hover {
+  background: var(--surface-2);
+}
+
+/* ---------- Reportes ---------- */
+.reports-charts {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.reports-rankings {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.chart-box {
+  position: relative;
+  height: 280px;
+  margin-top: 14px;
+}
+
+.chart-box--donut {
+  height: 240px;
+}
+
+@media (max-width: 1100px) {
+  .reports-charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reports-rankings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Modal ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(0 0 0 / 62%);
+  backdrop-filter: blur(4px);
+  animation: fade var(--t-fast) both;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.modal__card {
+  width: min(520px, 100%);
+  max-height: 86dvh;
+  overflow-y: auto;
+  padding: clamp(22px, 4vw, 30px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.modal__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .admin-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .sidebar__nav {
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .sidebar__footer {
+    margin-top: 0;
+  }
+}
+
+/* Marca de instituciones, carreras y materias cargadas por usuarios */
+.user-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-2);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}

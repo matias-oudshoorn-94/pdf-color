@@ -1,0 +1,3 @@
+# Sesiones de PHP: nunca se sirven directamente.
+Require all denied
+Deny from all

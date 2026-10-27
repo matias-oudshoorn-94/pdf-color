@@ -1,0 +1,62 @@
+Options -Indexes
+DirectoryIndex index.html
+
+# Sin esto, Apache sirve los módulos ES (.mjs) con un Content-Type genérico y
+# el navegador rechaza el import() por MIME type incorrecto (PDF.js no carga).
+<IfModule mod_mime.c>
+  AddType text/javascript .mjs
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Forzar HTTPS (descomentar cuando el certificado esté activo)
+  # RewriteCond %{HTTPS} !=on
+  # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Un solo dominio (sin www): las cookies de sesión son por host, así que quien
+  # navega en www.jetcopy.com.ar y vuelve de Mercado Pago a jetcopy.com.ar (la
+  # app.url de la config) aparece deslogueado.
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # La API se resuelve en su propia carpeta
+  RewriteRule ^api/ - [L]
+
+  # El panel de administración es una app aparte
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^admin(/.*)?$ admin/index.html [L]
+
+  # SPA: cualquier ruta que no sea un archivo real devuelve index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/jpeg "access plus 30 days"
+  ExpiresByType image/svg+xml "access plus 30 days"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# JS y CSS sin versionar: el navegador revalida en cada carga (304 si no cambiaron)
+# para no mezclar módulos viejos y nuevos después de un deploy.
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|mjs|css)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

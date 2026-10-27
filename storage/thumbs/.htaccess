@@ -1,0 +1,3 @@
+# Las miniaturas se sirven siempre a través de la API, nunca directo.
+Require all denied
+Deny from all
