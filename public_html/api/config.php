@@ -18,8 +18,8 @@ $config = [
         'host' => 'localhost',
         'port' => 3306,
         'name' => 'u245081402_pdfcolor',
-        'user' => 'u245081402_pdfcolor_admin',
-        'pass' => '', // completar con la contraseña de la base de PDF Color
+        'user' => 'u245081402_pdfcolor',
+        'pass' => 'uK2QESm3/K', // completar con la contraseña de la base de PDF Color
         'charset' => 'utf8mb4',
     ],
 
