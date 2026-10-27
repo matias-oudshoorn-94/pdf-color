@@ -9,17 +9,17 @@ declare(strict_types=1);
 
 $config = [
     'app' => [
-        'name' => 'Jetcopy',
+        'name' => 'PDF Color',
         'env' => 'production',          // 'local' muestra errores detallados
-        'url' => 'https://jetcopy.com.ar',
+        'url' => 'https://pdfcolor.com.ar',
     ],
 
     'db' => [
         'host' => 'localhost',
         'port' => 3306,
-        'name' => 'u245081402_jetcopy',
-        'user' => 'u245081402_jetcopy_admin',
-        'pass' => 'w1KfrZ5Cc~U',
+        'name' => 'u245081402_pdfcolor',
+        'user' => 'u245081402_pdfcolor',
+        'pass' => 'uK2QESm3/K', // completar con la contraseña de la base de PDF Color
         'charset' => 'utf8mb4',
     ],
 
@@ -29,7 +29,7 @@ $config = [
         // nunca están versionados), así que esta carpeta tiene que vivir afuera
         // del árbol que ese deploy gestiona. Confirmá la ruta real de tu cuenta
         // en hPanel → Administrador de archivos antes de subir este cambio.
-        'path' => '/home/u245081402/domains/jetcopy.com.ar/storage/uploads',
+        'path' => '/home/u245081402/domains/pdfcolor.com.ar/storage/uploads',
         'max_bytes' => 50 * 1024 * 1024,
         'allowed' => [
             'application/pdf' => 'pdf',
@@ -43,7 +43,7 @@ $config = [
         'login_window' => 900,           // segundos
         // Mismo motivo que uploads.path: afuera de public_html para que el Git
         // Deploy no cierre la sesión de todo el mundo en cada push.
-        'session_path' => '/home/u245081402/domains/jetcopy.com.ar/storage/sessions',
+        'session_path' => '/home/u245081402/domains/pdfcolor.com.ar/storage/sessions',
     ],
 
     'recaptcha' => [
@@ -82,7 +82,7 @@ $config = [
         'username' => '',
         'password' => '',
         'from_address' => '',
-        'from_name' => 'Jetcopy',
+        'from_name' => 'PDF Color',
     ],
 
     'contact' => [
@@ -98,7 +98,7 @@ $config = [
 // Git Deploy de hPanel lo borra en cada push (config.local.php está gitignored
 // a propósito, son credenciales). Primero busca afuera de public_html; si no
 // está ahí, usa la ubicación de siempre (entorno local, donde no hay ese problema).
-$externalLocalConfig = '/home/u245081402/domains/jetcopy.com.ar/config.local.php';
+$externalLocalConfig = '/home/u245081402/domains/pdfcolor.com.ar/config.local.php';
 $localConfigFile = is_file($externalLocalConfig) ? $externalLocalConfig : __DIR__ . '/config.local.php';
 
 if (is_file($localConfigFile)) {

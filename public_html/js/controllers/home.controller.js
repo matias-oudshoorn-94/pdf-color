@@ -22,7 +22,7 @@ export function homePage() {
     html: `
       <section class="page landing">
         <div class="landing__intro">
-          <h1 class="landing__welcome">Bienvenido a Jetcopy</h1>
+          <h1 class="landing__welcome">Bienvenido a PDF Color</h1>
           <p class="landing__subtitle">Subí tus archivos para imprimir o mirá los que ya subieron otros para pedirlos.</p>
         </div>
         <div class="landing__actions">

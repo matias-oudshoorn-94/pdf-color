@@ -80,10 +80,10 @@ let placesPromise = null;
 
 function loadPlaces(apiKey) {
   placesPromise ??= new Promise((resolve, reject) => {
-    window.__jetcopyMapsReady = () => window.google.maps.importLibrary('places').then(resolve, reject);
+    window.__pdfcolorMapsReady = () => window.google.maps.importLibrary('places').then(resolve, reject);
 
     loadScript(
-      `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async&language=es&region=AR&callback=__jetcopyMapsReady`,
+      `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&v=weekly&loading=async&language=es&region=AR&callback=__pdfcolorMapsReady`,
     ).catch(reject);
   });
 

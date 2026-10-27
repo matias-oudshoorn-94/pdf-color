@@ -52,7 +52,7 @@ async function renderSection() {
   const view = document.getElementById('view');
 
   document.getElementById('section-title').textContent = title;
-  document.title = `${title} · Panel Jetcopy`;
+  document.title = `${title} · Panel PDF Color`;
   view.innerHTML = html;
 
   await mount?.(view);

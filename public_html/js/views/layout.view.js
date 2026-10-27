@@ -94,7 +94,7 @@ export function layoutView({ user, path, cartCount, whatsapp }) {
 
       <header class="header">
         <div class="container header__inner">
-          <a class="brand" href="/" data-link aria-label="Jetcopy · inicio">
+          <a class="brand" href="/" data-link aria-label="PDF Color · inicio">
             ${logoMark({ size: 72 })}
           </a>
 
@@ -116,7 +116,7 @@ export function layoutView({ user, path, cartCount, whatsapp }) {
 
       <footer class="footer">
         <div class="container footer__inner">
-          <span>© ${new Date().getFullYear()} Jetcopy · Imprenta Mar del Plata</span>
+          <span>© ${new Date().getFullYear()} PDF Color · Imprenta Mar del Plata</span>
           <div class="social-footer social--footer-group">${socialLinks({ className: 'social social--footer' })}</div>
           <span>Desarrollado por <a style="color:#4ade80;font-weight:bold" href="https://api.whatsapp.com/send?phone=5492235044427">Matias Oudshoorn</a></span>
         </div>

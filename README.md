@@ -1,4 +1,4 @@
-# Jetcopy · Centro de impresiones online
+# PDF Color · Centro de impresiones online
 
 Sistema web para que los clientes suban archivos, los reutilicen desde un catálogo y generen pedidos de impresión que el administrador gestiona desde un panel.
 
@@ -111,7 +111,7 @@ provincia de Buenos Aires e instituciones, cursos y materias de ejemplo para Mar
 ## Desarrollo local
 
 ```bash
-./dev.sh                 # http://localhost:8000
+./dev.sh                 # http://127.0.0.1:8001 (PORT=xxxx ./dev.sh para cambiarlo)
 ```
 
 Requiere PHP 8.2+ con las extensiones `pdo_mysql`, `fileinfo` y `mbstring`, y un MySQL local.
@@ -126,6 +126,10 @@ return [
 ```
 
 Ese archivo no se versiona y pisa los valores de `config.php`.
+
+El servidor local usa `127.0.0.1:8001` (y no `localhost:8000`) para no chocar con Jetcopy si los dos
+están levantados: el navegador comparte las cookies de `localhost` entre puertos, así que la sesión y
+el token CSRF de uno pisarían los del otro. Usá también una base de datos local distinta para cada proyecto.
 
 ## Subir al hosting
 

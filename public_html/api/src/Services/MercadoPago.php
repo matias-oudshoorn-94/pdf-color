@@ -20,7 +20,7 @@ final class MercadoPago
 
         $payload = [
             'items' => [[
-                'title' => sprintf('Pedido #%s · Jetcopy', $order['id']),
+                'title' => sprintf('Pedido #%s · PDF Color', $order['id']),
                 'quantity' => 1,
                 'unit_price' => (float) $order['total'],
                 'currency_id' => 'ARS',
