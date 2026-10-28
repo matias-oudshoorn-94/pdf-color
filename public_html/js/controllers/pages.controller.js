@@ -57,6 +57,10 @@ export function contactPage() {
               <input class="input" name="email" type="email" required autocomplete="email" />
             </label>
             <label class="field">
+              <span class="field__label">Teléfono</span>
+              <input class="input" name="phone" type="tel" required minlength="6" maxlength="40" autocomplete="tel" />
+            </label>
+            <label class="field">
               <span class="field__label">Mensaje</span>
               <textarea class="textarea" name="message" required minlength="10" maxlength="2000"
                         placeholder="Contanos qué necesitás…"></textarea>
@@ -85,6 +89,7 @@ export function contactPage() {
               <a href="mailto:${esc(contact.email)}" style="text-decoration:underline">${esc(contact.email)}</a>
               <a href="tel:${esc(contact.phone.replace(/\s/g, ''))}" style="text-decoration:underline">${esc(contact.phone)}</a>
               <span class="muted">${esc(contact.address)}</span>
+              <span class="muted">H. Yrigoyen 2447</span>
             </div>
             <a class="btn" href="https://wa.me/${esc(contact.whatsapp)}" target="_blank" rel="noopener noreferrer">
               Escribir por WhatsApp
