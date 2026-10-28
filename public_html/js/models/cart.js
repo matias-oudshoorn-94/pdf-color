@@ -2,6 +2,10 @@ import { session } from './session.js';
 
 /** Carrito de impresión en memoria + localStorage. */
 const KEY = 'pdfcolor.cart';
+
+// Desde esta cantidad de hojas el archivo se agrega anillado; con menos, suelto.
+// El cliente lo puede cambiar después en el pedido.
+const RING_FROM_PAGES = 40;
 const listeners = new Set();
 
 function read() {
@@ -39,17 +43,19 @@ export const cart = {
 
   add(file) {
     if (this.has(file.id)) return false;
+    const pageCount = file.page_count ?? 1;
+
     items = [
       ...items,
       {
         fileId: file.id,
         title: file.title,
         mimeType: file.mime_type,
-        pageCount: file.page_count ?? 1,
+        pageCount,
         copies: 1,
         paperSize: 'A4',
         doubleSide: true,
-        finish: 'anillado',
+        finish: pageCount >= RING_FROM_PAGES ? 'anillado' : 'simple',
       },
     ];
     persist();
