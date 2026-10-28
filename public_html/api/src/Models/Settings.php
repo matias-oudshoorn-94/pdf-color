@@ -6,7 +6,11 @@ namespace App\Models;
 
 use App\Core\Database;
 
-/** Configuración global del sitio: precio por página y recargo por anillado. */
+/**
+ * Configuración global del sitio: recargo por anillado y costo de envío.
+ * El precio por página ya no sale de acá sino de los precios por cantidad (PriceTier);
+ * price_per_sheet queda en la tabla sin uso.
+ */
 final class Settings
 {
     public static function get(): array
@@ -20,11 +24,6 @@ final class Settings
         ];
     }
 
-    public static function pricePerSheet(): float
-    {
-        return self::get()['price_per_sheet'];
-    }
-
     public static function priceRing(): float
     {
         return self::get()['price_ring'];
@@ -35,13 +34,12 @@ final class Settings
         return self::get()['shipping_price'];
     }
 
-    public static function update(float $pricePerSheet, float $priceRing, float $shippingPrice): array
+    public static function update(float $priceRing, float $shippingPrice): array
     {
         Database::execute(
-            'INSERT INTO settings (id, price_per_sheet, price_ring, shipping_price) VALUES (1, :price, :ring, :shipping)
-             ON DUPLICATE KEY UPDATE price_per_sheet = VALUES(price_per_sheet), price_ring = VALUES(price_ring),
-                                      shipping_price = VALUES(shipping_price)',
-            ['price' => $pricePerSheet, 'ring' => $priceRing, 'shipping' => $shippingPrice],
+            'INSERT INTO settings (id, price_ring, shipping_price) VALUES (1, :ring, :shipping)
+             ON DUPLICATE KEY UPDATE price_ring = VALUES(price_ring), shipping_price = VALUES(shipping_price)',
+            ['ring' => $priceRing, 'shipping' => $shippingPrice],
         );
 
         return self::get();

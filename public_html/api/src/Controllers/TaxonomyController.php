@@ -10,10 +10,10 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Models\Career;
-use App\Models\DiscountTier;
 use App\Models\Institution;
 use App\Models\Location;
 use App\Models\PickupPoint;
+use App\Models\PriceTier;
 use App\Models\Subject;
 use App\Models\Year;
 use App\Services\Similarity;
@@ -190,8 +190,9 @@ final class TaxonomyController
         Response::json(['pickupPoints' => PickupPoint::active()]);
     }
 
-    public function discountTiers(Request $request): void
+    /** Precios por cantidad para el estimado en vivo del carrito y la subida. */
+    public function priceTiers(Request $request): void
     {
-        Response::json(['discountTiers' => DiscountTier::allActive()]);
+        Response::json(['priceTiers' => PriceTier::grouped()]);
     }
 }

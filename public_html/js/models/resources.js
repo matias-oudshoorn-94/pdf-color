@@ -17,7 +17,7 @@ export const TaxonomyModel = {
   years: (level) => api.get('/years', { query: { level } }),
   subjects: () => api.get('/subjects'),
   pickupPoints: () => api.get('/pickup-points'),
-  discountTiers: () => api.get('/discount-tiers'),
+  priceTiers: () => api.get('/price-tiers'),
 
   // Altas hechas por el usuario cuando no encuentra la opción (type: institution | career | subject).
   similar: (type, name, locationId = '') => api.get('/taxonomy/similar', { query: { type, name, locationId } }),

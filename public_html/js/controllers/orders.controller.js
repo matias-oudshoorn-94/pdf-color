@@ -6,7 +6,7 @@ import { formatMoney, truncate } from '../lib/format.js';
 import { emptyState, orderCard } from '../views/components.view.js';
 import { toastErr, toastOk } from '../lib/toast.js';
 import { navigate } from '../router.js';
-import { bestDiscountPercent, ringCharge, itemTotal } from '../lib/pricing.js';
+import { itemTotal, pricePerPage, ringCharge } from '../lib/pricing.js';
 import { paintThumbnail } from '../lib/thumbnail.js';
 import { getRecaptchaToken, recaptchaDisclaimer } from '../lib/recaptcha.js';
 import { attachAddressAutocomplete } from '../lib/google.js';
@@ -97,10 +97,8 @@ const toggle = (name, value) => `
   </div>
 `;
 
-const itemRow = (item, pricePerSheet, priceRing, tiers) => {
-  const totalPages = (item.pageCount ?? 1) * item.copies;
-  const discountPercent = bestDiscountPercent(totalPages, tiers);
-  const breakdown = `${item.pageCount ?? 1} página(s) × ${item.copies} copia(s) × ${formatMoney(pricePerSheet)}${
+const itemRow = (item, priceTiers, priceRing) => {
+  const breakdown = `${item.pageCount ?? 1} página(s) × ${item.copies} copia(s) × ${formatMoney(pricePerPage(item, priceTiers))}${
     ringCharge(item, priceRing) ? ` + anillado (${formatMoney(ringCharge(item, priceRing))})` : ''
   }`;
 
@@ -114,8 +112,7 @@ const itemRow = (item, pricePerSheet, priceRing, tiers) => {
         <div class="checkout-items-table__stack">
           <span class="cart-item__title" title="${esc(item.title)}">${esc(truncate(item.title, 20))}</span>
           <span class="muted" style="font-size:0.82rem">
-            ${discountPercent ? `<span class="badge badge--sales">-${discountPercent}%</span> ` : ''}
-            <strong>${formatMoney(itemTotal(item, pricePerSheet, priceRing, tiers))}</strong>
+            <strong>${formatMoney(itemTotal(item, priceTiers, priceRing))}</strong>
           </span>
           <span class="muted" style="font-size:0.72rem">${esc(breakdown)}</span>
         </div>
@@ -161,14 +158,13 @@ export function cartPage() {
       let itemsBox = null;
       let summary = null;
 
-      let pricePerSheet = 0;
       let priceRing = 0;
       let shippingPrice = 0;
       let deliveryMethod = 'retiro';
       let deliveryAddress = '';
       let pickupPointId = '';
       let pickupPoints = [];
-      let discountTiers = [];
+      let priceTiers = { doble: [], simple: [] };
       // Por ahora solo se cobra con Mercado Pago; "Pagar en el local" queda oculto (ver PAY_IN_STORE_ENABLED).
       let paymentMethod = PAY_IN_STORE_ENABLED ? 'efectivo' : 'mercadopago';
 
@@ -176,10 +172,9 @@ export function cartPage() {
 
       try {
         ({
-          settings: { price_per_sheet: pricePerSheet, price_ring: priceRing, shipping_price: shippingPrice },
+          settings: { price_ring: priceRing, shipping_price: shippingPrice },
         } = await SettingsModel.get());
       } catch {
-        pricePerSheet = 0;
         priceRing = 0;
         shippingPrice = 0;
       }
@@ -191,13 +186,13 @@ export function cartPage() {
       }
 
       try {
-        ({ discountTiers } = await TaxonomyModel.discountTiers());
+        ({ priceTiers } = await TaxonomyModel.priceTiers());
       } catch {
-        discountTiers = [];
+        priceTiers = { doble: [], simple: [] };
       }
 
       function orderTotal() {
-        const itemsTotal = cart.items.reduce((sum, item) => sum + itemTotal(item, pricePerSheet, priceRing, discountTiers), 0);
+        const itemsTotal = cart.items.reduce((sum, item) => sum + itemTotal(item, priceTiers, priceRing), 0);
 
         return itemsTotal + (deliveryMethod === 'envio' ? shippingPrice : 0);
       }
@@ -237,7 +232,7 @@ export function cartPage() {
                 </tr>
               </thead>
               <tbody>
-                ${cart.items.map((item) => itemRow(item, pricePerSheet, priceRing, discountTiers)).join('')}
+                ${cart.items.map((item) => itemRow(item, priceTiers, priceRing)).join('')}
               </tbody>
             </table>
           </div>

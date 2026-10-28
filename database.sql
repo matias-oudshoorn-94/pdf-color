@@ -133,16 +133,31 @@ CREATE TABLE IF NOT EXISTS pickup_points (
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Escalones de descuento: "a partir de X páginas, Y% de descuento". Se evalúa
--- por ítem del pedido (pages del archivo * copias), no sobre el total del pedido.
-CREATE TABLE IF NOT EXISTS discount_tiers (
-  id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  min_pages        INT UNSIGNED NOT NULL,
-  discount_percent DECIMAL(5,2) NOT NULL,
-  created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+-- Precios por cantidad según la faz: "desde X páginas, $Y por página". Se evalúa por
+-- ítem del pedido (pages del archivo * copias), no sobre el total del pedido, y todas
+-- las páginas del ítem se cobran al precio del rango en que cae ese total.
+CREATE TABLE IF NOT EXISTS price_tiers (
+  id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  side           ENUM('doble','simple') NOT NULL,
+  min_pages      INT UNSIGNED NOT NULL,
+  price_per_page DECIMAL(10,2) NOT NULL,
+  created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  UNIQUE KEY uq_discount_tiers_min_pages (min_pages)
+  UNIQUE KEY uq_price_tiers_side_min (side, min_pages)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO price_tiers (side, min_pages, price_per_page) VALUES
+  ('doble', 1, 200),
+  ('doble', 2, 150),
+  ('doble', 11, 60),
+  ('doble', 501, 55),
+  ('doble', 1001, 50),
+  ('doble', 1501, 40),
+  ('simple', 1, 200),
+  ('simple', 2, 170),
+  ('simple', 11, 150),
+  ('simple', 21, 80)
+ON DUPLICATE KEY UPDATE price_per_page = VALUES(price_per_page);
 
 CREATE TABLE IF NOT EXISTS orders (
   id               INT UNSIGNED NOT NULL AUTO_INCREMENT,

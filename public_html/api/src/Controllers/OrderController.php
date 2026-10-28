@@ -9,11 +9,11 @@ use App\Core\HttpException;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validator;
-use App\Models\DiscountTier;
 use App\Models\FileRecord;
 use App\Models\Order;
 use App\Models\PendingOrder;
 use App\Models\PickupPoint;
+use App\Models\PriceTier;
 use App\Models\Settings;
 use App\Models\User;
 use App\Services\Emails;
@@ -70,7 +70,6 @@ final class OrderController
         }
 
         $items = [];
-        $pricePerSheet = Settings::pricePerSheet();
         $priceRing = Settings::priceRing();
 
         foreach ($rawItems as $index => $rawItem) {
@@ -99,15 +98,21 @@ final class OrderController
 
             $pages = max(1, (int) $file['page_count']);
             $totalPages = $pages * $item['copies'];
-            $discountPercent = DiscountTier::bestDiscountFor($totalPages);
-            $subtotal = $totalPages * $pricePerSheet;
+            $side = $item['doubleSide'] ? 'doble' : 'simple';
+            $pricePerPage = PriceTier::pricePerPage($side, $totalPages);
+
+            if ($pricePerPage === null) {
+                throw HttpException::badRequest("Todavía no hay precios cargados para {$side} faz");
+            }
+
             $ringCharge = $item['finish'] === 'anillado' ? $priceRing * $item['copies'] : 0.0;
 
             $item['color'] = 'color';
             $item['pages'] = $pages;
-            $item['unit_price'] = $pricePerSheet;
-            $item['discount_percent'] = $discountPercent;
-            $item['total_price'] = round($subtotal - $subtotal * $discountPercent / 100 + $ringCharge, 2);
+            $item['unit_price'] = $pricePerPage;
+            // Ya no hay descuentos en %: el precio por página baja según el rango.
+            $item['discount_percent'] = 0;
+            $item['total_price'] = round($totalPages * $pricePerPage + $ringCharge, 2);
 
             $items[] = $item;
         }

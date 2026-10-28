@@ -10,10 +10,10 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Models\Career;
-use App\Models\DiscountTier;
 use App\Models\Institution;
 use App\Models\Location;
 use App\Models\PickupPoint;
+use App\Models\PriceTier;
 use App\Models\Subject;
 use App\Models\Year;
 
@@ -351,64 +351,64 @@ final class TaxonomyAdminController
             ->validated();
     }
 
-    // ---------- Descuentos por cantidad ----------
+    // ---------- Precios por cantidad ----------
 
-    public function discountTiers(Request $request): void
+    public function priceTiers(Request $request): void
     {
-        $page = Paginator::fromRequest($request, DiscountTier::SORTABLE, 'min_pages');
-
-        Response::json($page->response(DiscountTier::all($page), DiscountTier::count()));
+        Response::json(['priceTiers' => PriceTier::grouped()]);
     }
 
-    public function createDiscountTier(Request $request): void
+    public function createPriceTier(Request $request): void
     {
-        $data = $this->validateDiscountTier($request);
+        $data = $this->validatePriceTier($request);
+        $this->ensureMinPagesFree($data);
 
-        if (DiscountTier::minPagesTaken($data['minPages'])) {
-            throw HttpException::badRequest(
-                'Ya existe un escalón a partir de esa cantidad de páginas',
-                ['minPages' => ['Valor repetido']],
-            );
-        }
-
-        Response::json(['discountTier' => DiscountTier::create($data['minPages'], $data['discountPercent'])], 201);
+        Response::json(
+            ['priceTier' => PriceTier::create($data['side'], $data['minPages'], $data['pricePerPage'])],
+            201,
+        );
     }
 
-    public function updateDiscountTier(Request $request, array $params): void
+    public function updatePriceTier(Request $request, array $params): void
     {
         $id = (int) $params['id'];
 
-        if (DiscountTier::find($id) === null) {
-            throw HttpException::notFound('El escalón no existe');
+        if (PriceTier::find($id) === null) {
+            throw HttpException::notFound('El rango no existe');
         }
 
-        $data = $this->validateDiscountTier($request);
+        $data = $this->validatePriceTier($request);
+        $this->ensureMinPagesFree($data, $id);
 
-        if (DiscountTier::minPagesTaken($data['minPages'], $id)) {
-            throw HttpException::badRequest(
-                'Ya existe un escalón a partir de esa cantidad de páginas',
-                ['minPages' => ['Valor repetido']],
-            );
-        }
-
-        Response::json(['discountTier' => DiscountTier::update($id, $data['minPages'], $data['discountPercent'])]);
+        Response::json(['priceTier' => PriceTier::update($id, $data['side'], $data['minPages'], $data['pricePerPage'])]);
     }
 
-    public function deleteDiscountTier(Request $request, array $params): void
+    public function deletePriceTier(Request $request, array $params): void
     {
-        if (DiscountTier::find((int) $params['id']) === null) {
-            throw HttpException::notFound('El escalón no existe');
+        if (PriceTier::find((int) $params['id']) === null) {
+            throw HttpException::notFound('El rango no existe');
         }
 
-        DiscountTier::delete((int) $params['id']);
+        PriceTier::delete((int) $params['id']);
         Response::noContent();
     }
 
-    private function validateDiscountTier(Request $request): array
+    private function validatePriceTier(Request $request): array
     {
         return Validator::make($request->body())
-            ->int('minPages', 1, 100000)
-            ->float('discountPercent', 0, 100)
+            ->enum('side', PriceTier::SIDES)
+            ->int('minPages', 1, 1000000)
+            ->float('pricePerPage', 0, 999999)
             ->validated();
+    }
+
+    private function ensureMinPagesFree(array $data, ?int $exceptId = null): void
+    {
+        if (PriceTier::minPagesTaken($data['side'], $data['minPages'], $exceptId)) {
+            throw HttpException::badRequest(
+                'Ya existe un rango que empieza en esa cantidad de páginas',
+                ['minPages' => ['Valor repetido']],
+            );
+        }
     }
 }

@@ -5,7 +5,7 @@ import { orderDetailPage } from './controllers/order-detail.controller.js';
 import { filesPage } from './controllers/files.controller.js';
 import { adminsPage, clientsPage } from './controllers/users.controller.js';
 import { careersPage, institutionsPage, locationsPage, subjectsPage, yearsPage } from './controllers/taxonomy.controller.js';
-import { discountTiersPage, pickupPointsPage } from './controllers/checkout.controller.js';
+import { pickupPointsPage, priceTiersPage } from './controllers/checkout.controller.js';
 import { messagesPage } from './controllers/messages.controller.js';
 import { settingsPage } from './controllers/settings.controller.js';
 
@@ -17,7 +17,7 @@ export const SECTIONS = [
   { path: '/admin', label: 'Resumen', page: dashboardPage },
   { path: '/admin/reportes', label: 'Reportes', page: reportsPage },
   { path: '/admin/precios', label: 'Precios', page: settingsPage },
-  { path: '/admin/descuentos', label: 'Descuentos por cantidad', page: discountTiersPage },
+  { path: '/admin/precios-por-cantidad', label: 'Precios por cantidad', page: priceTiersPage },
   { path: '/admin/puntos-retiro', label: 'Puntos de retiro', page: pickupPointsPage },
   { path: '/admin/pedidos', label: 'Pedidos', page: ordersPage, alert: 'pendingOrders', alertTitle: 'pedidos nuevos' },
   { path: '/admin/archivos', label: 'Archivos', page: filesPage },

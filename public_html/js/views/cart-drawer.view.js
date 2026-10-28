@@ -16,26 +16,26 @@ async function loadSettings() {
   try {
     ({ settings: cachedSettings } = await SettingsModel.get());
   } catch {
-    cachedSettings = { price_per_sheet: 0, price_ring: 0, shipping_price: 0 };
+    cachedSettings = { price_ring: 0, shipping_price: 0 };
   }
 
   return cachedSettings;
 }
 
-/** Los escalones de descuento tampoco cambian durante la sesión. */
-async function loadDiscountTiers() {
+/** Los precios por cantidad tampoco cambian durante la sesión. */
+async function loadPriceTiers() {
   if (cachedTiers) return cachedTiers;
 
   try {
-    ({ discountTiers: cachedTiers } = await TaxonomyModel.discountTiers());
+    ({ priceTiers: cachedTiers } = await TaxonomyModel.priceTiers());
   } catch {
-    cachedTiers = [];
+    cachedTiers = { doble: [], simple: [] };
   }
 
   return cachedTiers;
 }
 
-const itemRow = (item, pricePerSheet, priceRing, tiers) => `
+const itemRow = (item, priceTiers, priceRing) => `
   <div class="cart-drawer__item" data-item="${item.fileId}">
     <div class="item-thumb" data-thumb data-state="loading">
       <img alt="" loading="lazy" />
@@ -43,7 +43,7 @@ const itemRow = (item, pricePerSheet, priceRing, tiers) => `
     <div class="cart-drawer__item-body">
       <div class="cart-drawer__item-head">
         <strong title="${esc(item.title)}">${esc(truncate(item.title, 40))}</strong>
-        <span>${formatMoney(itemTotal(item, pricePerSheet, priceRing, tiers))}</span>
+        <span>${formatMoney(itemTotal(item, priceTiers, priceRing))}</span>
       </div>
       <span class="muted">
         ${item.copies} copia${item.copies === 1 ? '' : 's'}${ringCharge(item, priceRing) ? ' · anillado' : ''}
@@ -56,9 +56,8 @@ const itemRow = (item, pricePerSheet, priceRing, tiers) => `
 /** Mini-carrito lateral: se abre al agregar un archivo al pedido. */
 export async function openCartDrawer() {
   const settings = await loadSettings();
-  const pricePerSheet = Number(settings.price_per_sheet) || 0;
   const priceRing = Number(settings.price_ring) || 0;
-  const tiers = await loadDiscountTiers();
+  const priceTiers = await loadPriceTiers();
 
   const overlay = document.createElement('div');
   overlay.className = 'cart-drawer';
@@ -79,7 +78,7 @@ export async function openCartDrawer() {
 
   function render() {
     const items = cart.items;
-    const total = items.reduce((sum, item) => sum + itemTotal(item, pricePerSheet, priceRing, tiers), 0);
+    const total = items.reduce((sum, item) => sum + itemTotal(item, priceTiers, priceRing), 0);
 
     overlay.innerHTML = `
       <aside class="cart-drawer__panel">
@@ -90,7 +89,7 @@ export async function openCartDrawer() {
         <div class="cart-drawer__items">
           ${
             items.length
-              ? items.map((item) => itemRow(item, pricePerSheet, priceRing, tiers)).join('')
+              ? items.map((item) => itemRow(item, priceTiers, priceRing)).join('')
               : '<p class="muted">Todavía no agregaste archivos.</p>'
           }
         </div>

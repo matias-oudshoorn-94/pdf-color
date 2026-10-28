@@ -1,6 +1,7 @@
-import { FilesModel, SettingsModel, TaxonomyModel } from '../models/resources.js';
+import { FilesModel, TaxonomyModel } from '../models/resources.js';
 import { cart } from '../models/cart.js';
 import { formatBytes, formatDate, formatMoney } from '../lib/format.js';
+import { pricePerPage } from '../lib/pricing.js';
 import { esc } from '../lib/dom.js';
 import { toastErr, toastOk } from '../lib/toast.js';
 import { navigate } from '../router.js';
@@ -232,7 +233,7 @@ export function uploadPage() {
       // fileHash: promesa con la huella SHA-256 del archivo elegido (o null si el navegador no puede).
       // duplicatesOkFor: archivo+título ya revisados (sin parecidos o "subir igual"), para no volver a preguntar.
       const state = { step: 1, file: null, level: '', fileHash: null, duplicatesOkFor: null };
-      let pricePerSheet = null;
+      let priceTiers = null;
 
       // ---------- Navegación entre pasos ----------
 
@@ -476,7 +477,10 @@ export function uploadPage() {
 
           filePreviewThumb.src = thumbnail;
 
-          const priceText = pricePerSheet != null ? ` · Precio estimado: ${formatMoney(pageCount * pricePerSheet)}` : '';
+          // Estimado para 1 copia doble faz (como arranca en el pedido), sin anillado.
+          const priceText = priceTiers
+            ? ` · Precio estimado: ${formatMoney(pageCount * pricePerPage({ pageCount, copies: 1, doubleSide: true }, priceTiers))}`
+            : '';
           filePreviewMeta.textContent = `${pageCount} página${pageCount === 1 ? '' : 's'} · ${formatBytes(file.size)}${priceText}`;
         } catch (error) {
           // No bloquea el paso: el servidor cuenta las páginas al subir de verdad.
@@ -512,10 +516,9 @@ export function uploadPage() {
       });
 
       try {
-        const { settings } = await SettingsModel.get();
-        pricePerSheet = Number(settings.price_per_sheet) || 0;
+        ({ priceTiers } = await TaxonomyModel.priceTiers());
       } catch {
-        pricePerSheet = null;
+        priceTiers = null;
       }
 
       // ---------- Paso 2: nivel ----------

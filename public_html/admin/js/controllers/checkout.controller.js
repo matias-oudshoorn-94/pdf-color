@@ -2,6 +2,8 @@ import { AdminApi } from '../models/admin.api.js';
 import { dataTable } from '../views/datatable.view.js';
 import { confirmAction, openModal } from '../views/modal.view.js';
 import { esc } from '/js/lib/dom.js';
+import { formatMoney } from '/js/lib/format.js';
+import { emptyState } from '/js/views/components.view.js';
 import { toastErr, toastOk } from '/js/lib/toast.js';
 
 export function pickupPointsPage() {
@@ -118,87 +120,153 @@ export function pickupPointsPage() {
   return { title: 'Puntos de retiro', html: table.html, mount: table.mount };
 }
 
-export function discountTiersPage() {
-  const fields = (tier = {}) => `
+const SIDE_LABELS = { doble: 'Doble faz', simple: 'Simple faz' };
+
+/**
+ * Precios por cantidad: una tabla por faz con rangos "desde X páginas, $Y por página".
+ * El "hasta" de cada rango es el "desde" del siguiente menos uno.
+ */
+export function priceTiersPage() {
+  const fields = (side, tier = {}) => `
     <label class="field">
-      <span class="field__label">A partir de (páginas)</span>
-      <input class="input" type="number" name="minPages" min="1" max="100000" required
+      <span class="field__label">Desde (páginas)</span>
+      <input class="input" type="number" name="minPages" min="1" max="1000000" required
              value="${tier.min_pages ?? ''}" />
-      <span class="field__hint">Se evalúa por archivo del pedido: páginas del archivo × copias.</span>
+      <span class="field__hint">El rango llega hasta donde empieza el siguiente. Se cuenta por archivo: páginas × copias.</span>
     </label>
     <label class="field">
-      <span class="field__label">Descuento (%)</span>
-      <input class="input" type="number" name="discountPercent" min="0" max="100" step="0.01" required
-             value="${tier.discount_percent ?? ''}" />
+      <span class="field__label">Precio por página ($)</span>
+      <input class="input" type="number" name="pricePerPage" min="0" step="0.01" required
+             value="${tier.price_per_page ?? ''}" />
     </label>
+    <input type="hidden" name="side" value="${side}" />
   `;
 
-  const table = dataTable({
-    searchPlaceholder: 'Buscar escalón',
-    defaultSort: 'min_pages',
-    defaultDir: 'asc',
-    emptyTitle: 'Sin descuentos por cantidad',
-    emptyHint: 'Agregá un escalón, ej: a partir de 100 páginas, 10% de descuento.',
-    columns: [
-      { key: 'min_pages', label: 'A partir de (páginas)' },
-      { key: 'discount_percent', label: 'Descuento (%)' },
-      { key: 'acciones', label: '', sortable: false },
-    ],
-    action: {
-      label: 'Nuevo escalón',
-      onClick: async (reload) => {
-        const created = await openModal({
-          title: 'Nuevo escalón de descuento',
-          confirmLabel: 'Crear',
-          body: fields(),
-          onSubmit: (data) => AdminApi.createDiscountTier(data),
-        });
+  const rangeLabel = (tiers, index) => {
+    const from = tiers[index].min_pages;
+    const next = tiers[index + 1];
 
-        if (created) {
-          toastOk('Escalón creado');
-          reload();
-        }
-      },
-    },
-    fetch: (params) => AdminApi.discountTiers(params),
-    deleteOne: (id) => AdminApi.deleteDiscountTier(id),
-    renderRow: (tier) => `
-      <td>${tier.min_pages}</td>
-      <td>${tier.discount_percent}%</td>
-      <td>
-        <div class="cell-actions">
-          <button class="btn btn--sm" data-action="edit" type="button">Editar</button>
-          <button class="btn btn--sm btn--danger" data-action="delete" type="button">Borrar</button>
-        </div>
-      </td>
-    `,
-    bindRow: (tier, tr, reload) => {
-      tr.querySelector('[data-action="edit"]').addEventListener('click', async () => {
-        const saved = await openModal({
-          title: 'Editar escalón de descuento',
-          body: fields(tier),
-          onSubmit: (data) => AdminApi.updateDiscountTier(tier.id, data),
-        });
+    if (!next) return `${from} o más`;
+    if (next.min_pages - 1 === from) return `${from}`;
 
-        if (saved) {
-          toastOk('Escalón actualizado');
-          reload();
-        }
-      });
+    return `${from} a ${next.min_pages - 1}`;
+  };
 
-      tr.querySelector('[data-action="delete"]').addEventListener('click', async () => {
-        if (!(await confirmAction(`¿Borrar el escalón "a partir de ${tier.min_pages} páginas"?`))) return;
+  const sideCard = (side, tiers) => `
+    <article class="card card--pad stack" data-side="${side}">
+      <div class="toolbar" style="margin:0">
+        <h3 class="card__title">${SIDE_LABELS[side]}</h3>
+        <span class="toolbar__spacer"></span>
+        <button class="btn btn--sm btn--primary" data-action="new" type="button">Agregar rango</button>
+      </div>
+      ${
+        tiers.length === 0
+          ? emptyState('Sin precios cargados', `No se pueden hacer pedidos en ${SIDE_LABELS[side].toLowerCase()} hasta cargar al menos un rango.`)
+          : `<div class="table-wrap">
+               <table class="table">
+                 <thead><tr><th>Páginas</th><th>Precio por página</th><th></th></tr></thead>
+                 <tbody>
+                   ${tiers
+                     .map(
+                       (tier, index) => `
+                         <tr data-id="${tier.id}">
+                           <td>${rangeLabel(tiers, index)}</td>
+                           <td><strong>${formatMoney(tier.price_per_page)}</strong></td>
+                           <td>
+                             <div class="cell-actions">
+                               <button class="btn btn--sm" data-action="edit" type="button">Editar</button>
+                               <button class="btn btn--sm btn--danger" data-action="delete" type="button">Borrar</button>
+                             </div>
+                           </td>
+                         </tr>`,
+                     )
+                     .join('')}
+                 </tbody>
+               </table>
+             </div>`
+      }
+    </article>
+  `;
+
+  return {
+    title: 'Precios por cantidad',
+    html: '<div id="content"><div class="skeleton" style="height:200px"></div></div>',
+    async mount(root) {
+      const content = root.querySelector('#content');
+
+      async function load() {
+        let priceTiers;
 
         try {
-          await AdminApi.deleteDiscountTier(tier.id);
-          toastOk('Escalón eliminado');
-          reload();
+          ({ priceTiers } = await AdminApi.priceTiers());
         } catch (error) {
-          toastErr(error.message);
+          content.innerHTML = emptyState('No se pudieron cargar los precios', error.message);
+          return;
         }
-      });
-    },
-  });
 
-  return { title: 'Descuentos por cantidad', html: table.html, mount: table.mount };
+        content.innerHTML = `
+          <p class="muted" style="max-width:760px;margin-bottom:16px">
+            Cada archivo del pedido se cobra según su faz y su cantidad de páginas (páginas del archivo × copias):
+            todas sus páginas van al precio del rango en que cae. Color o blanco y negro cuestan lo mismo.
+            El anillado y el envío se suman aparte (ver "Precios").
+          </p>
+          <div class="grid grid--split">
+            ${sideCard('doble', priceTiers.doble)}
+            ${sideCard('simple', priceTiers.simple)}
+          </div>
+        `;
+
+        for (const card of content.querySelectorAll('[data-side]')) {
+          const side = card.dataset.side;
+          const tiers = priceTiers[side];
+
+          card.querySelector('[data-action="new"]').addEventListener('click', async () => {
+            const created = await openModal({
+              title: `Nuevo rango · ${SIDE_LABELS[side]}`,
+              confirmLabel: 'Crear',
+              body: fields(side),
+              onSubmit: (data) => AdminApi.createPriceTier(data),
+            });
+
+            if (created) {
+              toastOk('Rango creado');
+              load();
+            }
+          });
+
+          for (const tr of card.querySelectorAll('[data-id]')) {
+            const tier = tiers.find((item) => String(item.id) === tr.dataset.id);
+
+            tr.querySelector('[data-action="edit"]').addEventListener('click', async () => {
+              const saved = await openModal({
+                title: `Editar rango · ${SIDE_LABELS[side]}`,
+                body: fields(side, tier),
+                onSubmit: (data) => AdminApi.updatePriceTier(tier.id, data),
+              });
+
+              if (saved) {
+                toastOk('Rango actualizado');
+                load();
+              }
+            });
+
+            tr.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+              const label = `desde ${tier.min_pages} página${tier.min_pages === 1 ? '' : 's'}`;
+              if (!(await confirmAction(`¿Borrar el rango "${label}" de ${SIDE_LABELS[side].toLowerCase()}?`))) return;
+
+              try {
+                await AdminApi.deletePriceTier(tier.id);
+                toastOk('Rango eliminado');
+                load();
+              } catch (error) {
+                toastErr(error.message);
+              }
+            });
+          }
+        }
+      }
+
+      await load();
+    },
+  };
 }

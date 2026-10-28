@@ -75,8 +75,8 @@ export const AdminApi = {
   updatePickupPoint: (id, payload) => api.patch(`/admin/pickup-points/${id}`, payload),
   deletePickupPoint: (id) => api.delete(`/admin/pickup-points/${id}`),
 
-  discountTiers: (params) => api.get('/admin/discount-tiers', { query: params }),
-  createDiscountTier: (payload) => api.post('/admin/discount-tiers', payload),
-  updateDiscountTier: (id, payload) => api.patch(`/admin/discount-tiers/${id}`, payload),
-  deleteDiscountTier: (id) => api.delete(`/admin/discount-tiers/${id}`),
+  priceTiers: () => api.get('/admin/price-tiers'),
+  createPriceTier: (payload) => api.post('/admin/price-tiers', payload),
+  updatePriceTier: (id, payload) => api.patch(`/admin/price-tiers/${id}`, payload),
+  deletePriceTier: (id) => api.delete(`/admin/price-tiers/${id}`),
 };

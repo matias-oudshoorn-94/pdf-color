@@ -41,7 +41,13 @@ final class FileRecord
                                     FROM order_items oi
                                     JOIN orders o ON o.id = oi.order_id
                                     WHERE oi.file_id = f.id AND o.status <> \'cancelado\') AS sales_count,
-                                   ROUND(f.page_count * (SELECT price_per_sheet FROM settings WHERE id = 1), 2) AS estimated_price,
+                                   ROUND(f.page_count * COALESCE(
+                                       (SELECT pt.price_per_page FROM price_tiers pt
+                                         WHERE pt.side = \'doble\' AND pt.min_pages <= f.page_count
+                                         ORDER BY pt.min_pages DESC LIMIT 1),
+                                       (SELECT pt.price_per_page FROM price_tiers pt
+                                         WHERE pt.side = \'doble\' ORDER BY pt.min_pages LIMIT 1),
+                                       0), 2) AS estimated_price,
                                    (SELECT COALESCE(ROUND(AVG(r.rating), 2), 0) FROM file_ratings r WHERE r.file_id = f.id) AS avg_rating,
                                    (SELECT COUNT(*) FROM file_ratings r WHERE r.file_id = f.id) AS ratings_count
                             FROM files f

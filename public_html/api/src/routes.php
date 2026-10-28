@@ -88,7 +88,7 @@ $router->get('/taxonomy/similar', [$taxonomy, 'similar']);
 $router->post('/institutions', [$taxonomy, 'createInstitution'], [Recaptcha::verify('taxonomy_create')]);
 $router->post('/careers', [$taxonomy, 'createCareer'], [Recaptcha::verify('taxonomy_create')]);
 $router->post('/subjects', [$taxonomy, 'createSubject'], [Recaptcha::verify('taxonomy_create')]);
-$router->get('/discount-tiers', [$taxonomy, 'discountTiers']);
+$router->get('/price-tiers', [$taxonomy, 'priceTiers']);
 
 // Panel de administración
 $adminController = new AdminController();
@@ -159,9 +159,9 @@ $router->post('/admin/pickup-points', [$taxonomyAdmin, 'createPickupPoint'], $ad
 $router->patch('/admin/pickup-points/{id}', [$taxonomyAdmin, 'updatePickupPoint'], $admin);
 $router->delete('/admin/pickup-points/{id}', [$taxonomyAdmin, 'deletePickupPoint'], $admin);
 
-$router->get('/admin/discount-tiers', [$taxonomyAdmin, 'discountTiers'], $admin);
-$router->post('/admin/discount-tiers', [$taxonomyAdmin, 'createDiscountTier'], $admin);
-$router->patch('/admin/discount-tiers/{id}', [$taxonomyAdmin, 'updateDiscountTier'], $admin);
-$router->delete('/admin/discount-tiers/{id}', [$taxonomyAdmin, 'deleteDiscountTier'], $admin);
+$router->get('/admin/price-tiers', [$taxonomyAdmin, 'priceTiers'], $admin);
+$router->post('/admin/price-tiers', [$taxonomyAdmin, 'createPriceTier'], $admin);
+$router->patch('/admin/price-tiers/{id}', [$taxonomyAdmin, 'updatePriceTier'], $admin);
+$router->delete('/admin/price-tiers/{id}', [$taxonomyAdmin, 'deletePriceTier'], $admin);
 
 return $router;

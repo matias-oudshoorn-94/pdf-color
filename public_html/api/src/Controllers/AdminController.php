@@ -63,13 +63,12 @@ final class AdminController
     public function updateSettings(Request $request): void
     {
         $data = Validator::make($request->body())
-            ->float('pricePerSheet', 0, 999999)
             ->float('priceRing', 0, 999999)
             ->float('shippingPrice', 0, 999999)
             ->validated();
 
         Response::json([
-            'settings' => Settings::update($data['pricePerSheet'], $data['priceRing'], $data['shippingPrice']),
+            'settings' => Settings::update($data['priceRing'], $data['shippingPrice']),
         ]);
     }
 
