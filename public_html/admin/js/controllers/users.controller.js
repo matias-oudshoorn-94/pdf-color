@@ -1,9 +1,22 @@
 import { AdminApi } from '../models/admin.api.js';
 import { dataTable } from '../views/datatable.view.js';
 import { confirmAction, openModal } from '../views/modal.view.js';
+import { WHATSAPP_ICON, whatsappUrl } from '../views/whatsapp.view.js';
 import { esc } from '/js/lib/dom.js';
 import { formatDate } from '/js/lib/format.js';
 import { toastErr, toastOk } from '/js/lib/toast.js';
+
+// Botón para abrir el chat de WhatsApp con el cliente. Solo si tiene un teléfono que se pueda usar.
+function whatsappButton(user) {
+  const url = whatsappUrl(user.phone, `Hola ${user.name}, te escribimos de PDF Color.`);
+  if (!url) return '';
+
+  return `
+    <a class="btn btn--sm" href="${esc(url)}" target="_blank" rel="noopener noreferrer">
+      ${WHATSAPP_ICON} Enviar WhatsApp
+    </a>
+  `;
+}
 
 const COPY = {
   client: {
@@ -103,6 +116,7 @@ export function usersPage(role) {
       <td>${formatDate(user.created_at)}</td>
       <td>
         <div class="cell-actions">
+          ${isClient ? whatsappButton(user) : ''}
           <button class="btn btn--sm" data-action="edit" type="button">Editar</button>
           <button class="btn btn--sm btn--danger" data-action="delete" type="button">Borrar</button>
         </div>
