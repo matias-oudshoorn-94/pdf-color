@@ -151,7 +151,7 @@ export function cartPage() {
             <h2>Mi pedido</h2>
             <p>Configurá cómo querés imprimir cada archivo.</p>
           </div>
-          <a class="btn btn--ghost" href="/catalogo" data-link>Agregar más archivos</a>
+          <a class="btn btn--primary" href="/subir" data-link>Agregar más archivos</a>
         </header>
         <div id="order-content"></div>
       </section>
