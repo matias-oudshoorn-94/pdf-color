@@ -5,6 +5,21 @@ import { esc } from '/js/lib/dom.js';
 import { formatDate } from '/js/lib/format.js';
 import { toastErr, toastOk } from '/js/lib/toast.js';
 
+// Abre la ventana de redactar de Gmail (en vez del programa de correo de la compu),
+// con el destinatario, el asunto y el mensaje original citado.
+function gmailReplyUrl(message) {
+  const quoted = message.body.split('\n').map((line) => `> ${line}`).join('\n');
+  const params = new URLSearchParams({
+    view: 'cm',
+    fs: '1',
+    to: message.email,
+    su: 'Re: Tu consulta en PDF Color',
+    body: `Hola ${message.name},\n\n\n\n${quoted}`,
+  });
+
+  return `https://mail.google.com/mail/?${params}`;
+}
+
 export function messagesPage() {
   const table = dataTable({
     searchPlaceholder: 'Buscar mensaje',
@@ -30,7 +45,7 @@ export function messagesPage() {
       <td>${formatDate(message.created_at)}</td>
       <td>
         <div class="cell-actions">
-          <a class="btn btn--sm" href="mailto:${esc(message.email)}">Responder</a>
+          <a class="btn btn--sm" href="${esc(gmailReplyUrl(message))}" target="_blank" rel="noopener noreferrer">Responder</a>
           <button class="btn btn--sm btn--danger" data-action="delete" type="button">Borrar</button>
         </div>
       </td>
