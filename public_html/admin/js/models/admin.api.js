@@ -1,9 +1,20 @@
 import { api } from '/js/models/api.js';
 
+/**
+ * Para cambios que mueven los contadores de pendientes (pedidos nuevos y mensajes
+ * sin leer): cuando terminan, avisa al menú lateral para que se actualice.
+ */
+const alertsChanged = (request) =>
+  request.then((result) => {
+    document.dispatchEvent(new CustomEvent('admin:alerts-changed'));
+    return result;
+  });
+
 /** Acceso a los endpoints del panel. Los listados aceptan {search, page, perPage, sort, dir, ...}. */
 export const AdminApi = {
   stats: () => api.get('/admin/stats'),
   copiesSold: () => api.get('/admin/copies-sold'),
+  alerts: () => api.get('/admin/alerts'),
 
   reportsSales: (params) => api.get('/admin/reports/sales', { query: params }),
   reportsOverview: (params) => api.get('/admin/reports/overview', { query: params }),
@@ -14,10 +25,10 @@ export const AdminApi = {
 
   orders: (params) => api.get('/admin/orders', { query: params }),
   order: (id) => api.get(`/admin/orders/${id}`),
-  updateOrderStatus: (id, status) => api.patch(`/admin/orders/${id}/status`, { status }),
+  updateOrderStatus: (id, status) => alertsChanged(api.patch(`/admin/orders/${id}/status`, { status })),
   updateOrderPaymentStatus: (id, paymentStatus) => api.patch(`/admin/orders/${id}/payment-status`, { paymentStatus }),
   notifyOrderReady: (id) => api.post(`/admin/orders/${id}/notify-ready`, {}),
-  deleteOrder: (id) => api.delete(`/admin/orders/${id}`),
+  deleteOrder: (id) => alertsChanged(api.delete(`/admin/orders/${id}`)),
 
   files: (params) => api.get('/admin/files', { query: params }),
   updateFile: (id, payload) => api.patch(`/admin/files/${id}`, payload),
@@ -31,7 +42,8 @@ export const AdminApi = {
   deleteClient: (id) => api.delete(`/admin/clients/${id}`),
 
   messages: (params) => api.get('/admin/messages', { query: params }),
-  deleteMessage: (id) => api.delete(`/admin/messages/${id}`),
+  updateMessageStatus: (id, status) => alertsChanged(api.patch(`/admin/messages/${id}/status`, { status })),
+  deleteMessage: (id) => alertsChanged(api.delete(`/admin/messages/${id}`)),
 
   locations: (params) => api.get('/admin/locations', { query: params }),
   createLocation: (payload) => api.post('/admin/locations', payload),

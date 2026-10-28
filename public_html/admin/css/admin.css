@@ -105,6 +105,14 @@
   color: var(--text-3);
 }
 
+.sidebar__count--alert {
+  min-width: 22px;
+  text-align: center;
+  background: var(--warn);
+  color: var(--accent-ink);
+  font-weight: 700;
+}
+
 .sidebar__footer {
   margin-top: auto;
   display: grid;
@@ -185,6 +193,141 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--text-3);
+}
+
+/* ---------- Resumen: lo que requiere atención ---------- */
+.attention-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.attention {
+  --tone: var(--warn);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 22px;
+  border: 1px solid color-mix(in srgb, var(--tone) 55%, var(--line));
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--tone) 12%, var(--surface));
+  color: var(--text);
+  text-decoration: none;
+  transition: transform var(--t-fast), background var(--t-fast), border-color var(--t-fast);
+}
+
+.attention--orders {
+  --tone: var(--info);
+}
+
+a.attention:hover {
+  transform: translateY(-2px);
+  background: color-mix(in srgb, var(--tone) 20%, var(--surface));
+  border-color: var(--tone);
+}
+
+a.attention:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.attention__count {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--tone);
+}
+
+.attention__body {
+  display: grid;
+  gap: 4px;
+}
+
+.attention__title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.attention__action {
+  font-size: 0.85rem;
+  color: var(--tone);
+  font-weight: 600;
+}
+
+/* Punto que late en la esquina, para que se note de un vistazo. */
+.attention__pulse {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--tone);
+  animation: attention-pulse 1.8s ease-out infinite;
+}
+
+@keyframes attention-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--tone) 70%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 12px transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attention__pulse {
+    animation: none;
+  }
+}
+
+.attention--idle {
+  --tone: var(--text-3);
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.attention--idle .attention__count {
+  font-size: 2rem;
+}
+
+.attention--idle .attention__title {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* ---------- Mensajes ---------- */
+.row--unread > td {
+  background: color-mix(in srgb, var(--warn) 7%, transparent);
+}
+
+.row--unread > td:first-child {
+  box-shadow: inset 3px 0 0 var(--warn);
+}
+
+.row--unread > td:nth-child(2) {
+  font-weight: 700;
+}
+
+.message-status {
+  font-weight: 600;
+}
+
+.message-status--no_leido {
+  color: var(--warn);
+}
+
+.message-status--leido {
+  color: var(--text-2);
+}
+
+.message-status--respondido {
+  color: var(--ok);
 }
 
 /* ---------- Toolbar y tablas ---------- */

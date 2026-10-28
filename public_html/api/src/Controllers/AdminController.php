@@ -27,6 +27,8 @@ use App\Services\Uploader;
 /** Endpoints exclusivos del panel de administración. */
 final class AdminController
 {
+    private const MESSAGE_STATUSES = ['no_leido', 'leido', 'respondido'];
+
     public function stats(Request $request): void
     {
         $stats = Order::stats();
@@ -35,6 +37,19 @@ final class AdminController
         $stats['thumbnailsServerSide'] = Thumbnailer::available();
 
         Response::json(['stats' => $stats]);
+    }
+
+    /** Lo que requiere atención: el panel lo muestra en el menú y en el resumen. */
+    public function alerts(Request $request): void
+    {
+        Response::json([
+            'unreadMessages' => (int) Database::selectOne(
+                "SELECT COUNT(*) AS t FROM messages WHERE status = 'no_leido'",
+            )['t'],
+            'pendingOrders' => (int) Database::selectOne(
+                "SELECT COUNT(*) AS t FROM orders WHERE status = 'pendiente'",
+            )['t'],
+        ]);
     }
 
     /** Contador de copias vendidas que el panel muestra siempre arriba. */
@@ -363,12 +378,40 @@ final class AdminController
 
     public function messages(Request $request): void
     {
-        $page = Paginator::fromRequest($request, ['name' => 'name', 'email' => 'email', 'created_at' => 'created_at'], 'created_at');
+        $page = Paginator::fromRequest(
+            $request,
+            ['name' => 'name', 'email' => 'email', 'status' => 'status', 'created_at' => 'created_at'],
+            'created_at',
+        );
+
+        $status = (string) $request->query('status', '');
+
+        if ($status !== '' && !in_array($status, self::MESSAGE_STATUSES, true)) {
+            throw HttpException::badRequest('Estado desconocido');
+        }
+
+        $where = $status === '' ? '' : 'WHERE status = ?';
+        $bindings = $status === '' ? [] : [$status];
 
         Response::json($page->response(
-            Database::select('SELECT * FROM messages ' . $page->orderBy() . ' ' . $page->limit()),
-            (int) Database::selectOne('SELECT COUNT(*) AS total FROM messages')['total'],
+            Database::select("SELECT * FROM messages {$where} " . $page->orderBy() . ' ' . $page->limit(), $bindings),
+            (int) Database::selectOne("SELECT COUNT(*) AS total FROM messages {$where}", $bindings)['total'],
         ));
+    }
+
+    public function updateMessageStatus(Request $request, array $params): void
+    {
+        $data = Validator::make($request->body())->enum('status', self::MESSAGE_STATUSES)->validated();
+        $id = (int) $params['id'];
+
+        Database::execute('UPDATE messages SET status = ? WHERE id = ?', [$data['status'], $id]);
+        $message = Database::selectOne('SELECT * FROM messages WHERE id = ?', [$id]);
+
+        if ($message === null) {
+            throw HttpException::notFound('El mensaje no existe');
+        }
+
+        Response::json(['message' => $message]);
     }
 
     public function deleteMessage(Request $request, array $params): void

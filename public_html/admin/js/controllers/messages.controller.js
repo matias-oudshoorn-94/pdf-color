@@ -5,6 +5,12 @@ import { esc } from '/js/lib/dom.js';
 import { formatDate } from '/js/lib/format.js';
 import { toastErr, toastOk } from '/js/lib/toast.js';
 
+export const MESSAGE_STATUS_LABELS = {
+  no_leido: 'No leído',
+  leido: 'Leído',
+  respondido: 'Respondido',
+};
+
 // Abre la ventana de redactar de Gmail (en vez del programa de correo de la compu),
 // con el destinatario, el asunto y el mensaje original citado.
 function gmailReplyUrl(message) {
@@ -81,7 +87,7 @@ function phoneCell(message) {
   const phone = esc(message.phone);
 
   return url
-    ? `<br /><a class="muted" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Abrir en WhatsApp" style="text-decoration:underline">${phone}</a>`
+    ? `<br /><a class="muted" href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="Abrir en WhatsApp" style="text-decoration:underline" data-reply>${phone}</a>`
     : `<br /><span class="muted">${phone}</span>`;
 }
 
@@ -89,26 +95,52 @@ function replyButtons(message) {
   const whatsappUrl = whatsappReplyUrl(message);
 
   return `
-    <a class="btn btn--sm" href="${esc(gmailReplyUrl(message))}" target="_blank" rel="noopener noreferrer">
+    <a class="btn btn--sm" href="${esc(gmailReplyUrl(message))}" target="_blank" rel="noopener noreferrer" data-reply>
       ${GMAIL_ICON} Contestar por correo
     </a>
     ${whatsappUrl ? `
-      <a class="btn btn--sm" href="${esc(whatsappUrl)}" target="_blank" rel="noopener noreferrer">
+      <a class="btn btn--sm" href="${esc(whatsappUrl)}" target="_blank" rel="noopener noreferrer" data-reply>
         ${WHATSAPP_ICON} Contestar por WhatsApp
       </a>` : ''}
   `;
 }
 
+function statusSelect(message) {
+  return `
+    <select class="select select--sm message-status message-status--${esc(message.status)}" data-status aria-label="Estado del mensaje">
+      ${Object.entries(MESSAGE_STATUS_LABELS)
+        .map(([value, label]) => `<option value="${value}" ${value === message.status ? 'selected' : ''}>${label}</option>`)
+        .join('')}
+    </select>
+  `;
+}
+
 export function messagesPage() {
+  // Desde el resumen se llega con ?estado=no_leido para ver solo esos.
+  const initialStatus = new URLSearchParams(location.search).get('estado') ?? '';
+
   const table = dataTable({
     searchPlaceholder: 'Buscar mensaje',
     defaultSort: 'created_at',
     emptyTitle: 'Sin mensajes',
     emptyHint: 'Las consultas del formulario de contacto llegan acá.',
+    filters: [
+      {
+        id: 'message-status-filter',
+        name: 'status',
+        html: `<select class="select" id="message-status-filter">
+                 <option value="">Todos los estados</option>
+                 ${Object.entries(MESSAGE_STATUS_LABELS)
+                   .map(([v, l]) => `<option value="${v}" ${v === initialStatus ? 'selected' : ''}>${l}</option>`)
+                   .join('')}
+               </select>`,
+      },
+    ],
     columns: [
       { key: 'name', label: 'Nombre' },
       { key: 'email', label: 'Contacto' },
       { key: 'mensaje', label: 'Mensaje', sortable: false },
+      { key: 'status', label: 'Estado' },
       { key: 'created_at', label: 'Fecha' },
       { key: 'acciones', label: '', sortable: false },
     ],
@@ -121,6 +153,7 @@ export function messagesPage() {
         ${phoneCell(message)}
       </td>
       <td style="max-width:420px;white-space:pre-wrap">${esc(message.body)}</td>
+      <td>${statusSelect(message)}</td>
       <td>${formatDate(message.created_at)}</td>
       <td>
         <div class="cell-actions">
@@ -130,6 +163,27 @@ export function messagesPage() {
       </td>
     `,
     bindRow: (message, tr, reload) => {
+      tr.classList.toggle('row--unread', message.status === 'no_leido');
+
+      const setStatus = async (status, { quiet = false } = {}) => {
+        try {
+          await AdminApi.updateMessageStatus(message.id, status);
+          if (!quiet) toastOk(`Mensaje marcado como ${MESSAGE_STATUS_LABELS[status].toLowerCase()}`);
+          reload();
+        } catch (error) {
+          toastErr(error.message);
+        }
+      };
+
+      tr.querySelector('[data-status]').addEventListener('change', (event) => setStatus(event.target.value));
+
+      // Contestar por correo o WhatsApp lo marca como respondido. El link se abre igual.
+      for (const link of tr.querySelectorAll('[data-reply]')) {
+        link.addEventListener('click', () => {
+          if (message.status !== 'respondido') setStatus('respondido', { quiet: true });
+        });
+      }
+
       tr.querySelector('[data-action="delete"]').addEventListener('click', async () => {
         if (!(await confirmAction('¿Borrar este mensaje?'))) return;
 
