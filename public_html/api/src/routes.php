@@ -95,6 +95,7 @@ $adminController = new AdminController();
 
 $router->get('/admin/stats', [$adminController, 'stats'], $admin);
 $router->get('/admin/copies-sold', [$adminController, 'copiesSold'], $admin);
+$router->get('/admin/alerts', [$adminController, 'alerts'], $admin);
 $router->patch('/admin/settings', [$adminController, 'updateSettings'], $admin);
 $router->post('/admin/files/recount-pages', [$adminController, 'recountPages'], $admin);
 
@@ -115,6 +116,7 @@ $router->patch('/admin/clients/{id}', [$adminController, 'updateClient'], $admin
 $router->delete('/admin/clients/{id}', [$adminController, 'deleteClient'], $admin);
 
 $router->get('/admin/messages', [$adminController, 'messages'], $admin);
+$router->patch('/admin/messages/{id}/status', [$adminController, 'updateMessageStatus'], $admin);
 $router->delete('/admin/messages/{id}', [$adminController, 'deleteMessage'], $admin);
 
 // Reportes

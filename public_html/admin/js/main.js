@@ -21,7 +21,10 @@ function shell(user, activePath) {
           ${SECTIONS.map(
             (section) => `
               <a class="sidebar__link" href="${section.path}" data-link
-                 ${section.path === activePath ? 'aria-current="page"' : ''}>${section.label}</a>`,
+                 ${section.path === activePath ? 'aria-current="page"' : ''}>
+                <span>${section.label}</span>
+                ${section.alert ? `<span class="sidebar__count sidebar__count--alert" data-alert="${section.alert}" hidden></span>` : ''}
+              </a>`,
           ).join('')}
         </nav>
 
@@ -52,10 +55,46 @@ async function renderSection() {
   const view = document.getElementById('view');
 
   document.getElementById('section-title').textContent = title;
-  document.title = `${title} · Panel PDF Color`;
+  baseTitle = `${title} · Panel PDF Color`;
+  applyTitle();
   view.innerHTML = html;
 
   await mount?.(view);
+}
+
+// Título de la pestaña con la cantidad de pendientes adelante, ej. "(3) Resumen · Panel PDF Color",
+// para notarlo aunque el panel esté en otra pestaña.
+let baseTitle = 'Panel PDF Color';
+let pendingTotal = 0;
+
+function applyTitle() {
+  document.title = pendingTotal > 0 ? `(${pendingTotal}) ${baseTitle}` : baseTitle;
+}
+
+// Contadores de pedidos nuevos y mensajes sin leer en el menú lateral.
+async function renderAlerts() {
+  if (!session.isAdmin) return;
+
+  try {
+    const alerts = await AdminApi.alerts();
+    pendingTotal = 0;
+
+    for (const section of SECTIONS.filter((item) => item.alert)) {
+      const count = alerts[section.alert] ?? 0;
+      const badge = app.querySelector(`[data-alert="${section.alert}"]`);
+      pendingTotal += count;
+
+      if (!badge) continue;
+
+      badge.hidden = count === 0;
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.title = `${count} ${section.alertTitle}`;
+    }
+
+    applyTitle();
+  } catch {
+    // Si falla, se deja lo que había: no es motivo para cortar el panel.
+  }
 }
 
 // Se pide de nuevo en cada cambio de sección, así refleja pedidos nuevos o cancelados.
@@ -97,7 +136,13 @@ function paint() {
 
   renderSection();
   renderCopiesSold();
+  renderAlerts();
 }
+
+document.addEventListener('admin:alerts-changed', renderAlerts);
+
+// Revisa cada minuto si entraron pedidos o mensajes nuevos.
+setInterval(renderAlerts, 60_000);
 
 onNavigate(paint);
 window.addEventListener('popstate', paint);

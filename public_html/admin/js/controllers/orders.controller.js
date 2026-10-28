@@ -36,6 +36,9 @@ const itemLine = (item) => `
 `;
 
 export function ordersPage() {
+  // Desde el resumen se llega con ?estado=pendiente para ver solo los nuevos.
+  const initialStatus = new URLSearchParams(location.search).get('estado') ?? '';
+
   const table = dataTable({
     searchPlaceholder: 'Buscar por cliente, email o #pedido',
     defaultSort: 'created_at',
@@ -47,7 +50,9 @@ export function ordersPage() {
         name: 'status',
         html: `<select class="select" id="status-filter">
                  <option value="">Todos los estados</option>
-                 ${Object.entries(STATUS_LABELS).map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}
+                 ${Object.entries(STATUS_LABELS)
+                   .map(([v, l]) => `<option value="${v}" ${v === initialStatus ? 'selected' : ''}>${l}</option>`)
+                   .join('')}
                </select>`,
       },
     ],

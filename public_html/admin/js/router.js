@@ -9,14 +9,17 @@ import { discountTiersPage, pickupPointsPage } from './controllers/checkout.cont
 import { messagesPage } from './controllers/messages.controller.js';
 import { settingsPage } from './controllers/settings.controller.js';
 
-/** Secciones visibles en el menú lateral. */
+/**
+ * Secciones visibles en el menú lateral. `alert` es el contador de /admin/alerts
+ * que se muestra al lado del nombre cuando hay algo pendiente.
+ */
 export const SECTIONS = [
   { path: '/admin', label: 'Resumen', page: dashboardPage },
   { path: '/admin/reportes', label: 'Reportes', page: reportsPage },
   { path: '/admin/precios', label: 'Precios', page: settingsPage },
   { path: '/admin/descuentos', label: 'Descuentos por cantidad', page: discountTiersPage },
   { path: '/admin/puntos-retiro', label: 'Puntos de retiro', page: pickupPointsPage },
-  { path: '/admin/pedidos', label: 'Pedidos', page: ordersPage },
+  { path: '/admin/pedidos', label: 'Pedidos', page: ordersPage, alert: 'pendingOrders', alertTitle: 'pedidos nuevos' },
   { path: '/admin/archivos', label: 'Archivos', page: filesPage },
   { path: '/admin/localidades', label: 'Localidades', page: locationsPage },
   { path: '/admin/instituciones', label: 'Instituciones', page: institutionsPage },
@@ -25,7 +28,7 @@ export const SECTIONS = [
   { path: '/admin/materias', label: 'Materias', page: subjectsPage },
   { path: '/admin/clientes', label: 'Clientes', page: clientsPage },
   { path: '/admin/administradores', label: 'Administradores', page: adminsPage },
-  { path: '/admin/mensajes', label: 'Mensajes', page: messagesPage },
+  { path: '/admin/mensajes', label: 'Mensajes', page: messagesPage, alert: 'unreadMessages', alertTitle: 'mensajes sin leer' },
 ];
 
 /** Rutas con parámetros que no aparecen en el menú. */
