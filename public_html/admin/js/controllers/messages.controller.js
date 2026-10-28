@@ -13,7 +13,7 @@ export function messagesPage() {
     emptyHint: 'Las consultas del formulario de contacto llegan acá.',
     columns: [
       { key: 'name', label: 'Nombre' },
-      { key: 'email', label: 'Email' },
+      { key: 'email', label: 'Contacto' },
       { key: 'mensaje', label: 'Mensaje', sortable: false },
       { key: 'created_at', label: 'Fecha' },
       { key: 'acciones', label: '', sortable: false },
@@ -22,7 +22,10 @@ export function messagesPage() {
     deleteOne: (id) => AdminApi.deleteMessage(id),
     renderRow: (message) => `
       <td>${esc(message.name)}</td>
-      <td><a href="mailto:${esc(message.email)}" style="text-decoration:underline">${esc(message.email)}</a></td>
+      <td>
+        <a href="mailto:${esc(message.email)}" style="text-decoration:underline">${esc(message.email)}</a>
+        ${message.phone ? `<br /><a class="muted" href="tel:${esc(message.phone.replace(/\s/g, ''))}">${esc(message.phone)}</a>` : ''}
+      </td>
       <td style="max-width:420px;white-space:pre-wrap">${esc(message.body)}</td>
       <td>${formatDate(message.created_at)}</td>
       <td>

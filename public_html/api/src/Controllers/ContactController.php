@@ -25,12 +25,13 @@ final class ContactController
         $data = Validator::make($request->body())
             ->string('name', 2, 120)
             ->email('email')
+            ->string('phone', 6, 40)
             ->string('message', 10, 2000)
             ->validated();
 
         Database::insert(
-            'INSERT INTO messages (name, email, body) VALUES (?, ?, ?)',
-            [$data['name'], $data['email'], $data['message']],
+            'INSERT INTO messages (name, email, phone, body) VALUES (?, ?, ?, ?)',
+            [$data['name'], $data['email'], $data['phone'], $data['message']],
         );
 
         Response::json(['ok' => true], 201);

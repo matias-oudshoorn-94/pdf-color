@@ -90,7 +90,7 @@ $config = [
         'phone' => '223 5 655434',
         'whatsapp' => '5492235655434',
         'address' => 'Ayacucho 3592, Mar del Plata',
-        'hours' => 'Lunes a viernes de 9 a 18 h · Sábados de 9 a 13 h',
+        'hours' => 'Lunes a viernes de 9 a 17 h · Sábados de 9 a 17 h',
     ],
 ];
 
