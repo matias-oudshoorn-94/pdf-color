@@ -1,5 +1,6 @@
 import { logoMark } from '../views/logo.view.js';
 import { ContactModel } from '../models/resources.js';
+import { mountPickupMap } from '../views/pickup-map.view.js';
 import { esc } from '../lib/dom.js';
 import { toastErr, toastOk } from '../lib/toast.js';
 
@@ -30,8 +31,13 @@ export function aboutPage() {
             <p>Todo lo que subís queda guardado en tu cuenta para volver a pedirlo en dos clics.</p>
           </article>
         </div>
+
+        <div id="pickup-map"></div>
       </section>
     `,
+    mount(root) {
+      mountPickupMap(root.querySelector('#pickup-map'));
+    },
   };
 }
 
@@ -73,12 +79,16 @@ export function contactPage() {
             <div class="skeleton" style="height:180px"></div>
           </div>
         </div>
+
+        <div id="pickup-map"></div>
       </section>
     `,
     async mount(root) {
       const form = root.querySelector('#contact-form');
       const errorBox = root.querySelector('#contact-error');
       const info = root.querySelector('#contact-info');
+
+      mountPickupMap(root.querySelector('#pickup-map'));
 
       try {
         const { contact } = await ContactModel.info();
@@ -89,7 +99,7 @@ export function contactPage() {
               <a href="mailto:${esc(contact.email)}" style="text-decoration:underline">${esc(contact.email)}</a>
               <a href="tel:${esc(contact.phone.replace(/\s/g, ''))}" style="text-decoration:underline">${esc(contact.phone)}</a>
               <span class="muted">${esc(contact.address)}</span>
-              <span class="muted">H. Yrigoyen 2447</span>
+              <span class="muted">H. Yrigoyen 2447m Mar del Plata</span>
             </div>
             <a class="btn" href="https://wa.me/${esc(contact.whatsapp)}" target="_blank" rel="noopener noreferrer">
               Escribir por WhatsApp

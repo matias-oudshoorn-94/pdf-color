@@ -436,6 +436,22 @@
   color: var(--accent-ink);
 }
 
+/* Link secundario debajo de los dos botones: discreto, sin competir con ellos. */
+.landing__link {
+  margin-top: -8px;
+  color: var(--text-3);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+  transition: color var(--t-fast), text-decoration-color var(--t-fast);
+}
+
+.landing__link:hover {
+  color: var(--text);
+  text-decoration-color: currentcolor;
+}
+
 .landing__icon {
   display: grid;
   place-items: center;
@@ -1145,6 +1161,127 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 14px;
+}
+
+.catalog-sort__spacer {
+  flex: 1;
+}
+
+/* Botón "Filtros": solo en celular (ver más abajo). */
+.filters-toggle {
+  display: none;
+}
+
+.filters-toggle__count {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.filters-toggle__count[hidden] {
+  display: none;
+}
+
+/* En la compu el panel no existe: el formulario de filtros se ve como siempre. */
+.filters-drawer,
+.filters-drawer__panel {
+  display: contents;
+}
+
+.filters-drawer__backdrop,
+.filters-drawer__head,
+.filters-drawer__foot {
+  display: none;
+}
+
+@media (max-width: 720px) {
+  .filters-toggle {
+    display: inline-flex;
+  }
+
+  .catalog-sort {
+    flex-wrap: nowrap;
+  }
+
+  .catalog-sort__label {
+    display: none;
+  }
+
+  .catalog-sort select {
+    min-width: 0;
+    flex: 0 1 200px;
+  }
+
+  .filters-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 96;
+    display: none;
+  }
+
+  .filters-drawer.is-open {
+    display: block;
+  }
+
+  .filters-drawer__backdrop {
+    position: absolute;
+    inset: 0;
+    display: block;
+    background: rgb(0 0 0 / 55%);
+    animation: fade var(--t-fast) both;
+  }
+
+  .filters-drawer__panel {
+    position: absolute;
+    inset: 0 auto 0 0;
+    display: flex;
+    flex-direction: column;
+    width: min(360px, 88%);
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    animation: slide-in-left var(--t) both;
+  }
+
+  .filters-drawer__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .filters-drawer__head h3 {
+    margin: 0;
+  }
+
+  .filters-drawer .filters {
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .filters-drawer__foot {
+    display: block;
+    padding: 14px 16px;
+    border-top: 1px solid var(--line);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
 }
 
 .catalog-sort__label {
@@ -2113,4 +2250,105 @@
 .quick-create__similar[hidden],
 .quick-create__prompt[hidden] {
   display: none;
+}
+
+/* ---------- Calculador de precios ---------- */
+.calculator .delivery-toggle {
+  grid-template-columns: 1fr 1fr;
+}
+
+.calculator .delivery-toggle__btn {
+  padding: 12px;
+}
+
+.calculator-result__label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+
+.calculator-result__total {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 7vw, 3rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.calculator-result__lines {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.calculator-result__lines > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+
+.calculator-result__lines dt {
+  color: var(--text-2);
+}
+
+.calculator-result__lines dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.calculator-result__note {
+  font-size: 0.82rem;
+}
+
+/* Tabla chica de 2 columnas: no necesita el ancho mínimo de las tablas grandes. */
+.table.calculator-tiers {
+  min-width: 0;
+}
+
+.calculator-tiers tr.is-active td {
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---------- Quiénes somos: mapa de puntos de retiro ---------- */
+.pickup-map {
+  margin-top: 12px;
+}
+
+.pickup-map__layout {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 861px) {
+  .pickup-map__layout {
+    grid-template-columns: minmax(240px, 1fr) 2fr;
+  }
+
+  /* La columna de la lista es angosta: un punto debajo del otro. */
+  .pickup-grid.pickup-map__list {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pickup-map__list {
+  align-content: start;
+}
+
+.pickup-map__directions {
+  justify-self: start;
+  color: var(--text-2);
+  font-size: 0.88rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.pickup-map__directions:hover {
+  color: var(--text);
 }

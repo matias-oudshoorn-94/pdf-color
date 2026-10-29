@@ -30,6 +30,14 @@ export function catalogPage() {
           </div>
         </header>
 
+        <!-- En la compu los filtros se ven siempre; en el celular se abren en un panel lateral. -->
+        <div class="filters-drawer" id="filters-drawer">
+          <div class="filters-drawer__backdrop" data-close-filters></div>
+          <div class="filters-drawer__panel" aria-label="Filtros">
+            <header class="filters-drawer__head">
+              <h3>Filtros</h3>
+              <button class="btn btn--sm btn--ghost" type="button" data-close-filters>Cerrar</button>
+            </header>
         <form class="card card--pad filters" id="filters" role="search">
           <label class="field">
             <span class="field__label">Localidad</span>
@@ -65,8 +73,21 @@ export function catalogPage() {
             <input class="input" id="search" type="search" placeholder="Título o materia…" />
           </label>
         </form>
+            <footer class="filters-drawer__foot">
+              <button class="btn btn--primary btn--block" type="button" data-close-filters id="filters-apply">Ver archivos</button>
+            </footer>
+          </div>
+        </div>
 
         <div class="catalog-sort">
+          <button class="btn filters-toggle" type="button" id="filters-open" aria-controls="filters-drawer" aria-expanded="false">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 6h16M7 12h10M10 18h4" />
+            </svg>
+            Filtros
+            <span class="filters-toggle__count" id="filters-count" hidden></span>
+          </button>
+          <span class="catalog-sort__spacer"></span>
           <label class="catalog-sort__label" for="sort">Ordenar por</label>
           <select class="select" id="sort">
             <option value="created_at-desc">Más recientes</option>
@@ -119,6 +140,50 @@ export function catalogPage() {
       const loadMoreBox = root.querySelector('#load-more');
       const moreButton = root.querySelector('#more');
       const counter = root.querySelector('#counter');
+      const filtersDrawer = root.querySelector('#filters-drawer');
+      const filtersOpen = root.querySelector('#filters-open');
+      const filtersCount = root.querySelector('#filters-count');
+      const filtersApply = root.querySelector('#filters-apply');
+
+      // ---------- Panel de filtros (solo celular) ----------
+
+      function onFiltersKey(event) {
+        if (event.key === 'Escape') closeFilters();
+      }
+
+      // Mientras está abierto, el panel se pasa al <body>: la animación de entrada de
+      // .page deja un transform que, si no, lo encierra dentro de la página en vez de
+      // cubrir toda la pantalla. Al cerrar vuelve a su lugar.
+      const filtersAnchor = document.createComment('filtros');
+      filtersDrawer.before(filtersAnchor);
+      const mobileQuery = window.matchMedia('(max-width: 720px)');
+
+      function openFilters() {
+        document.body.append(filtersDrawer);
+        filtersDrawer.classList.add('is-open');
+        filtersOpen.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', onFiltersKey);
+      }
+
+      function closeFilters() {
+        if (!filtersDrawer.classList.contains('is-open')) return;
+
+        filtersDrawer.classList.remove('is-open');
+        filtersAnchor.after(filtersDrawer);
+        filtersOpen.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', onFiltersKey);
+      }
+
+      filtersOpen.addEventListener('click', openFilters);
+      for (const button of root.querySelectorAll('[data-close-filters]')) {
+        button.addEventListener('click', closeFilters);
+      }
+
+      // Si se agranda la ventana a tamaño compu, o se navega con el panel abierto, se cierra.
+      mobileQuery.addEventListener('change', closeFilters);
+      window.addEventListener('popstate', closeFilters, { once: true });
 
       // Estado de la paginación incremental.
       let page = 1;
@@ -240,6 +305,8 @@ export function catalogPage() {
         ].filter(Boolean);
 
         chips.hidden = active.length === 0;
+        filtersCount.hidden = active.length === 0;
+        filtersCount.textContent = String(active.length);
 
         chips.innerHTML =
           active
@@ -290,6 +357,7 @@ export function catalogPage() {
         counter.textContent = hasMore
           ? `Mostrando ${loaded.length} de ${total} archivos`
           : `${total} archivo${total === 1 ? '' : 's'}`;
+        filtersApply.textContent = total === 0 ? 'Ver resultados' : `Ver ${total} archivo${total === 1 ? '' : 's'}`;
       }
 
       async function load({ append = false } = {}) {

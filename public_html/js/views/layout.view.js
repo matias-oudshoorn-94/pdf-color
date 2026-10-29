@@ -8,6 +8,7 @@ const LINKS = [
   { href: '/contacto', label: 'Contacto' },
   { href: '/subir', label: 'Subir archivo' },
   { href: '/catalogo', label: 'Catálogo' },
+  { href: '/calculadora', label: 'Calculador de precios' },
 ];
 
 const ACCOUNT_LINKS = [
@@ -30,6 +31,35 @@ const chevron = `
        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="m6 9 6 6 6-6" />
   </svg>
+`;
+
+const footerIcon = (path) => `
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"
+       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg>
+`;
+
+const PIN_ICON = footerIcon('<path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21Z" /><circle cx="12" cy="9.5" r="2.5" />');
+const MAIL_ICON = footerIcon('<rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" />');
+const PHONE_ICON = footerIcon('<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" />');
+
+const mapsUrl = (address) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+/** Datos de contacto del local que se muestran en el pie de todas las páginas. */
+const FOOTER_CONTACT = `
+  <div class="footer__contact">
+    <a class="footer__contact-item" href="${mapsUrl('Ayacucho 3592, Mar del Plata')}" target="_blank" rel="noopener noreferrer">
+      ${PIN_ICON}<span>Ayacucho 3592, Mar del Plata</span>
+    </a>
+    <a class="footer__contact-item" href="${mapsUrl('Hipólito Yrigoyen 2447, Mar del Plata')}" target="_blank" rel="noopener noreferrer">
+      ${PIN_ICON}<span>H. Yrigoyen 2447</span>
+    </a>
+    <a class="footer__contact-item" href="mailto:info@pdfcolor.com.ar">
+      ${MAIL_ICON}<span>info@pdfcolor.com.ar</span>
+    </a>
+    <a class="footer__contact-item" href="tel:+542235655434">
+      ${PHONE_ICON}<span>223 5 655434</span>
+    </a>
+  </div>
 `;
 
 export function layoutView({ user, path, cartCount, whatsapp }) {
@@ -115,6 +145,7 @@ export function layoutView({ user, path, cartCount, whatsapp }) {
       </main>
 
       <footer class="footer">
+        <div class="container">${FOOTER_CONTACT}</div>
         <div class="container footer__inner">
           <span>© ${new Date().getFullYear()} PDF Color · Imprenta Mar del Plata</span>
           <div class="social-footer social--footer-group">${socialLinks({ className: 'social social--footer' })}</div>

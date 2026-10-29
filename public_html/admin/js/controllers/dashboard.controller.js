@@ -4,11 +4,12 @@ import { esc } from '/js/lib/dom.js';
 import { formatBytes, formatDate, STATUS_LABELS } from '/js/lib/format.js';
 import { emptyState, statusBadge } from '/js/views/components.view.js';
 
-const metric = (value, label) => `
-  <article class="metric">
+/** Cajita de métrica. Con href es un link a la sección (o al listado filtrado). */
+const metric = (value, label, href) => `
+  <a class="metric metric--link" href="${href}" data-nav>
     <div class="metric__value">${value}</div>
     <div class="metric__label">${label}</div>
-  </article>
+  </a>
 `;
 
 const plural = (count, singular, pluralForm) => (count === 1 ? singular : pluralForm);
@@ -66,15 +67,15 @@ export function dashboardPage() {
           </div>
 
           <div class="metrics">
-            ${metric(stats.orders, 'Pedidos totales')}
-            ${metric(stats.byStatus.pendiente, 'Pendientes')}
-            ${metric(stats.byStatus.en_proceso, 'En proceso')}
-            ${metric(stats.byStatus.listo, 'Listos para retirar')}
-            ${metric(stats.clients, 'Clientes')}
-            ${metric(stats.admins, 'Administradores')}
-            ${metric(stats.files, 'Archivos')}
-            ${metric(formatBytes(stats.storageBytes), 'Almacenamiento')}
-            ${metric(stats.messages, 'Mensajes')}
+            ${metric(stats.orders, 'Pedidos totales', '/admin/pedidos')}
+            ${metric(stats.byStatus.pendiente, 'Pendientes', '/admin/pedidos?estado=pendiente')}
+            ${metric(stats.byStatus.en_proceso, 'En proceso', '/admin/pedidos?estado=en_proceso')}
+            ${metric(stats.byStatus.listo, 'Listos para retirar', '/admin/pedidos?estado=listo')}
+            ${metric(stats.clients, 'Clientes', '/admin/clientes')}
+            ${metric(stats.admins, 'Administradores', '/admin/administradores')}
+            ${metric(stats.files, 'Archivos', '/admin/archivos')}
+            ${metric(formatBytes(stats.storageBytes), 'Almacenamiento', '/admin/archivos')}
+            ${metric(stats.messages, 'Mensajes', '/admin/mensajes')}
           </div>
 
           <h2 style="margin-top:26px">Últimos pedidos</h2>

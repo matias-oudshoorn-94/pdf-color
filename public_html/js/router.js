@@ -2,6 +2,7 @@ import { session } from './models/session.js';
 import { homePage } from './controllers/home.controller.js';
 import { forgotPasswordPage, loginPage, registerPage, resetPasswordPage } from './controllers/auth.controller.js';
 import { catalogPage } from './controllers/catalog.controller.js';
+import { calculatorPage } from './controllers/calculator.controller.js';
 import { uploadPage } from './controllers/upload.controller.js';
 import { cartPage, ordersPage } from './controllers/orders.controller.js';
 import { paymentResultPage } from './controllers/payment-result.controller.js';
@@ -19,6 +20,7 @@ const routes = {
   '/recuperar-contrasena': { page: forgotPasswordPage, guest: true },
   '/restablecer-contrasena': { page: resetPasswordPage, guest: true },
   '/catalogo': { page: catalogPage },
+  '/calculadora': { page: calculatorPage },
   '/subir': { page: uploadPage },
   '/pedido': { page: cartPage },
   // Sin auth: a la vuelta de Mercado Pago puede no haber sesión (otro navegador).

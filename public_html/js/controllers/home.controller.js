@@ -35,6 +35,7 @@ export function homePage() {
             <span class="landing__label">Ver catálogo</span>
           </a>
         </div>
+        <a class="landing__link" href="/calculadora" data-link>¿Cuánto sale imprimir? Calculá el precio →</a>
       </section>
     `,
   };
