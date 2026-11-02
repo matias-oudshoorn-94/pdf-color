@@ -129,6 +129,11 @@ export function orderDetailPage(id) {
               }
               <div><dt>Pago</dt><dd>${esc(PAYMENT_METHOD_LABELS[order.payment_method] ?? order.payment_method)} · ${paymentBadge(order.payment_status)}</dd></div>
               ${order.mp_status_detail ? `<div><dt>Detalle del pago</dt><dd class="muted">${esc(order.mp_status_detail)}</dd></div>` : ''}
+              ${
+                order.payment_method === 'mercadopago'
+                  ? `<div><dt>Cobrado en</dt><dd>${order.mp_account_name ? esc(order.mp_account_name) : '<span class="muted">Cuenta del servidor (config)</span>'}</dd></div>`
+                  : ''
+              }
             </dl>
             ${
               order.payment_method === 'efectivo'

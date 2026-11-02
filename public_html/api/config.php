@@ -71,6 +71,11 @@ $config = [
         'public_key' => '',
         // Access token: secreto, se completa en config.local.php (no versionado) o acá antes de subir a producción.
         'access_token' => '',
+        // Clave para cifrar los access tokens de las cuentas que se cargan desde el admin
+        // (Cuentas de Mercado Pago). Secreta: va en config.local.php. Si se cambia, hay
+        // que volver a cargar el token de cada cuenta. Vacía = se deriva de la contraseña
+        // de la base (funciona igual, pero si cambia esa contraseña pasa lo mismo).
+        'secrets_key' => '',
     ],
 
     'mail' => [

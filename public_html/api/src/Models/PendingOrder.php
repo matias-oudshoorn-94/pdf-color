@@ -41,6 +41,14 @@ final class PendingOrder
         return $row;
     }
 
+    /** Cuenta de Mercado Pago en la que se cobra (null = token de config.php, también para intenciones viejas). */
+    public static function mpAccountId(array $pending): ?int
+    {
+        $id = $pending['payload']['mpAccountId'] ?? null;
+
+        return $id !== null ? (int) $id : null;
+    }
+
     public static function setPreference(int $id, string $preferenceId): void
     {
         Database::execute('UPDATE pending_orders SET mp_preference_id = ? WHERE id = ?', [$preferenceId, $id]);

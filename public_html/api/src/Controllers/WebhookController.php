@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Request;
 use App\Core\Response;
+use App\Models\MpAccount;
 use App\Models\Order;
 use App\Models\PendingOrder;
 use App\Services\Emails;
@@ -30,8 +31,20 @@ final class WebhookController
             return;
         }
 
+        // ?cuenta=ID lo agrega createPreference: dice en qué cuenta se cobró, porque el pago
+        // solo se puede consultar con el token de esa cuenta. Sin el parámetro (preferencias
+        // de antes de que hubiera varias cuentas) es el token de config.php.
+        $rawAccount = (string) ($request->query('cuenta') ?? '');
+        $accountId = ctype_digit($rawAccount) ? (int) $rawAccount : null;
+
+        if ($rawAccount !== '' && ($accountId === null || !MpAccount::exists($accountId))) {
+            Response::json(['ok' => true]);
+
+            return;
+        }
+
         // Nunca se confía en el body del webhook: se vuelve a pedir el pago real con el access token.
-        $payment = MercadoPago::getPayment($paymentId);
+        $payment = MercadoPago::getPayment($paymentId, $accountId);
 
         if ($payment === null) {
             error_log('[mercadopago webhook] no se pudo obtener el pago ' . $paymentId);
@@ -46,7 +59,10 @@ final class WebhookController
             $pendingId = (int) substr($externalReference, strlen('pending-'));
             $pending = PendingOrder::find($pendingId);
 
-            if ($pending !== null && $pending['promoted_order_id'] === null && ($payment['status'] ?? '') === 'approved') {
+            // El pago tiene que venir de la misma cuenta con la que se generó el cobro.
+            $sameAccount = $pending !== null && PendingOrder::mpAccountId($pending) === $accountId;
+
+            if ($sameAccount && $pending['promoted_order_id'] === null && ($payment['status'] ?? '') === 'approved') {
                 $order = Order::createFromPending(
                     $pending['payload'],
                     (int) $pending['user_id'],

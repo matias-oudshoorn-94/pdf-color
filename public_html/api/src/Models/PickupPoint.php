@@ -11,10 +11,10 @@ use App\Core\Paginator;
 final class PickupPoint
 {
     public const SORTABLE = [
-        'name' => 'name',
-        'is_active' => 'is_active',
+        'name' => 'p.name',
+        'is_active' => 'p.is_active',
         'orders_count' => 'orders_count',
-        'created_at' => 'created_at',
+        'created_at' => 'p.created_at',
     ];
 
     public static function all(string $search = '', ?Paginator $page = null): array
@@ -22,8 +22,10 @@ final class PickupPoint
         [$where, $params] = self::filters($search);
 
         $sql = "SELECT p.id, p.name, p.address, p.notes, p.is_active, p.created_at,
+                       p.mp_account_id, a.name AS mp_account_name,
                        (SELECT COUNT(*) FROM orders o WHERE o.pickup_point_id = p.id) AS orders_count
-                FROM pickup_points p {$where} ";
+                FROM pickup_points p
+                LEFT JOIN mp_accounts a ON a.id = p.mp_account_id {$where} ";
 
         $sql .= $page ? $page->orderBy() . ' ' . $page->limit() : 'ORDER BY p.name';
 
@@ -59,21 +61,22 @@ final class PickupPoint
         return Database::selectOne('SELECT * FROM pickup_points WHERE id = ?', [$id]);
     }
 
-    public static function create(string $name, string $address, ?string $notes, bool $isActive): array
+    /** $mpAccountId: cuenta de Mercado Pago con la que cobra (null = la principal). */
+    public static function create(string $name, string $address, ?string $notes, bool $isActive, ?int $mpAccountId): array
     {
         $id = Database::insert(
-            'INSERT INTO pickup_points (name, address, notes, is_active) VALUES (?, ?, ?, ?)',
-            [$name, $address, $notes, (int) $isActive],
+            'INSERT INTO pickup_points (name, address, notes, is_active, mp_account_id) VALUES (?, ?, ?, ?, ?)',
+            [$name, $address, $notes, (int) $isActive, $mpAccountId],
         );
 
         return self::find($id);
     }
 
-    public static function update(int $id, string $name, string $address, ?string $notes, bool $isActive): ?array
+    public static function update(int $id, string $name, string $address, ?string $notes, bool $isActive, ?int $mpAccountId): ?array
     {
         Database::execute(
-            'UPDATE pickup_points SET name = ?, address = ?, notes = ?, is_active = ? WHERE id = ?',
-            [$name, $address, $notes, (int) $isActive, $id],
+            'UPDATE pickup_points SET name = ?, address = ?, notes = ?, is_active = ?, mp_account_id = ? WHERE id = ?',
+            [$name, $address, $notes, (int) $isActive, $mpAccountId, $id],
         );
 
         return self::find($id);

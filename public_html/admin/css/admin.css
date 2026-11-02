@@ -636,3 +636,38 @@ a.attention:focus-visible {
   text-transform: uppercase;
   vertical-align: middle;
 }
+
+/* ---------- Cuentas de Mercado Pago ---------- */
+.mp-account__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mp-account__badges {
+  display: flex;
+  gap: 6px;
+}
+
+.mp-account__data {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.mp-account__data dt {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+}
+
+.mp-account__data dd {
+  margin: 2px 0 0;
+}
+
+.mp-account--archived {
+  opacity: 0.6;
+}

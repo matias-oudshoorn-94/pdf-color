@@ -43,7 +43,6 @@ final class GoogleAuth
             error_log('[google] ' . curl_error($ch));
         }
 
-        curl_close($ch);
 
         $claims = $raw === false ? null : json_decode((string) $raw, true);
 

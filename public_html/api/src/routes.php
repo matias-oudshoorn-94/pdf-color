@@ -6,6 +6,7 @@ use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\ContactController;
 use App\Controllers\FileController;
+use App\Controllers\MpAccountController;
 use App\Controllers\OrderController;
 use App\Controllers\ReportsController;
 use App\Controllers\SettingsController;
@@ -158,6 +159,14 @@ $router->get('/admin/pickup-points', [$taxonomyAdmin, 'pickupPoints'], $admin);
 $router->post('/admin/pickup-points', [$taxonomyAdmin, 'createPickupPoint'], $admin);
 $router->patch('/admin/pickup-points/{id}', [$taxonomyAdmin, 'updatePickupPoint'], $admin);
 $router->delete('/admin/pickup-points/{id}', [$taxonomyAdmin, 'deletePickupPoint'], $admin);
+
+$mpAccounts = new MpAccountController();
+$router->get('/admin/mp-accounts', [$mpAccounts, 'index'], $admin);
+$router->post('/admin/mp-accounts', [$mpAccounts, 'store'], $admin);
+$router->patch('/admin/mp-accounts/{id}', [$mpAccounts, 'update'], $admin);
+$router->post('/admin/mp-accounts/{id}/default', [$mpAccounts, 'makeDefault'], $admin);
+$router->post('/admin/mp-accounts/{id}/archive', [$mpAccounts, 'archive'], $admin);
+$router->post('/admin/mp-accounts/{id}/restore', [$mpAccounts, 'restore'], $admin);
 
 $router->get('/admin/price-tiers', [$taxonomyAdmin, 'priceTiers'], $admin);
 $router->post('/admin/price-tiers', [$taxonomyAdmin, 'createPriceTier'], $admin);

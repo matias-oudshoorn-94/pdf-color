@@ -121,16 +121,39 @@ CREATE TABLE IF NOT EXISTS files (
   CONSTRAINT fk_files_subject FOREIGN KEY (subject_id) REFERENCES subjects (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Cuentas de Mercado Pago. El access token va cifrado (ver Services/Secrets.php).
+-- La cuenta principal (is_default) cobra los envíos y los puntos de retiro sin cuenta
+-- asignada; sin ninguna cuenta cargada se usa mercadopago.access_token de config.php.
+-- No se borran, se archivan (is_active = 0), para poder verificar pagos que lleguen tarde.
+CREATE TABLE IF NOT EXISTS mp_accounts (
+  id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name             VARCHAR(120) NOT NULL,
+  access_token_enc TEXT NOT NULL,
+  token_hint       VARCHAR(12) NOT NULL,
+  is_test          TINYINT(1) NOT NULL DEFAULT 0,
+  mp_user_id       VARCHAR(40) NULL,
+  mp_nickname      VARCHAR(120) NULL,
+  mp_email         VARCHAR(180) NULL,
+  is_default       TINYINT(1) NOT NULL DEFAULT 0,
+  is_active        TINYINT(1) NOT NULL DEFAULT 1,
+  created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Puntos de retiro: lista libre administrable, con dirección para mostrar el
 -- mapa de Google en el checkout cuando se elige "retiro en sucursal".
+-- mp_account_id: con qué cuenta de Mercado Pago cobra (NULL = la principal).
 CREATE TABLE IF NOT EXISTS pickup_points (
-  id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name       VARCHAR(120) NOT NULL,
-  address    VARCHAR(300) NOT NULL,
-  notes      VARCHAR(300) NULL,
-  is_active  TINYINT(1) NOT NULL DEFAULT 1,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name          VARCHAR(120) NOT NULL,
+  address       VARCHAR(300) NOT NULL,
+  notes         VARCHAR(300) NULL,
+  mp_account_id INT UNSIGNED NULL,
+  is_active     TINYINT(1) NOT NULL DEFAULT 1,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_pickup_points_mp_account FOREIGN KEY (mp_account_id) REFERENCES mp_accounts (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Precios por cantidad según la faz: "desde X páginas, $Y por página". Se evalúa por
@@ -175,6 +198,8 @@ CREATE TABLE IF NOT EXISTS orders (
   mp_preference_id VARCHAR(80) NULL,
   mp_payment_id    VARCHAR(80) NULL,
   mp_status_detail VARCHAR(60) NULL,
+  -- Cuenta de Mercado Pago en la que se cobró (NULL = token de config.php).
+  mp_account_id    INT UNSIGNED NULL,
   -- Última vez que el admin mandó el mail de "listo para retirar".
   ready_notified_at TIMESTAMP NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -184,7 +209,8 @@ CREATE TABLE IF NOT EXISTS orders (
   KEY ix_orders_status (status, created_at),
   KEY ix_orders_pickup_point (pickup_point_id),
   CONSTRAINT fk_orders_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-  CONSTRAINT fk_orders_pickup_point FOREIGN KEY (pickup_point_id) REFERENCES pickup_points (id) ON DELETE SET NULL
+  CONSTRAINT fk_orders_pickup_point FOREIGN KEY (pickup_point_id) REFERENCES pickup_points (id) ON DELETE SET NULL,
+  CONSTRAINT fk_orders_mp_account FOREIGN KEY (mp_account_id) REFERENCES mp_accounts (id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- El pedido de Mercado Pago no se crea en orders hasta que el pago se confirma

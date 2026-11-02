@@ -6,8 +6,43 @@ import { formatMoney } from '/js/lib/format.js';
 import { emptyState } from '/js/views/components.view.js';
 import { toastErr, toastOk } from '/js/lib/toast.js';
 
+// Cuentas activas para el selector "Cobra con". Se piden al abrir el formulario,
+// así siempre están al día con lo que se cargó en "Cuentas de Mercado Pago".
+async function activeMpAccounts() {
+  try {
+    const { accounts } = await AdminApi.mpAccounts();
+    return accounts.filter((account) => Number(account.is_active) === 1);
+  } catch {
+    return [];
+  }
+}
+
+const mpAccountField = (point, accounts) => {
+  const principal = accounts.find((account) => Number(account.is_default) === 1);
+
+  return `
+    <label class="field">
+      <span class="field__label">Cobra con la cuenta de Mercado Pago</span>
+      <select class="select" name="mpAccountId">
+        <option value="">Principal${principal ? ` (${esc(principal.name)})` : ''}</option>
+        ${accounts
+          .map(
+            (account) =>
+              `<option value="${account.id}" ${String(account.id) === String(point.mp_account_id ?? '') ? 'selected' : ''}>${esc(account.name)}</option>`,
+          )
+          .join('')}
+      </select>
+      <span class="field__hint">${
+        accounts.length
+          ? 'Los pagos de los pedidos con retiro acá van a esta cuenta.'
+          : 'Todavía no hay cuentas cargadas: se cargan en "Cuentas de Mercado Pago".'
+      }</span>
+    </label>
+  `;
+};
+
 export function pickupPointsPage() {
-  const fields = (point = {}) => `
+  const fields = (point = {}, accounts = []) => `
     <label class="field">
       <span class="field__label">Nombre</span>
       <input class="input" name="name" required minlength="2" maxlength="120"
@@ -28,6 +63,7 @@ export function pickupPointsPage() {
       <input type="checkbox" name="isActive" ${point.id === undefined || Number(point.is_active) ? 'checked' : ''} />
       Activo (visible para elegir en el checkout)
     </label>
+    ${mpAccountField(point, accounts)}
   `;
 
   const table = dataTable({
@@ -40,6 +76,7 @@ export function pickupPointsPage() {
       { key: 'name', label: 'Nombre' },
       { key: 'address', label: 'Dirección' },
       { key: 'is_active', label: 'Activo' },
+      { key: 'mp_account', label: 'Cobra en', sortable: false },
       { key: 'orders_count', label: 'Pedidos' },
       { key: 'acciones', label: '', sortable: false },
     ],
@@ -49,13 +86,14 @@ export function pickupPointsPage() {
         const created = await openModal({
           title: 'Nuevo punto de retiro',
           confirmLabel: 'Crear',
-          body: fields(),
+          body: fields({}, await activeMpAccounts()),
           onSubmit: (data, form) =>
             AdminApi.createPickupPoint({
               name: data.name,
               address: data.address,
               notes: data.notes,
               isActive: form.isActive.checked,
+              mpAccountId: data.mpAccountId,
             }),
         });
 
@@ -71,6 +109,7 @@ export function pickupPointsPage() {
       <td>${esc(point.name)}</td>
       <td>${esc(point.address)}</td>
       <td>${Number(point.is_active) ? '<span class="badge badge--sales">Activo</span>' : '<span class="muted">Inactivo</span>'}</td>
+      <td>${point.mp_account_name ? esc(point.mp_account_name) : '<span class="muted">Principal</span>'}</td>
       <td>${point.orders_count}</td>
       <td>
         <div class="cell-actions">
@@ -83,13 +122,14 @@ export function pickupPointsPage() {
       tr.querySelector('[data-action="edit"]').addEventListener('click', async () => {
         const saved = await openModal({
           title: 'Editar punto de retiro',
-          body: fields(point),
+          body: fields(point, await activeMpAccounts()),
           onSubmit: (data, form) =>
             AdminApi.updatePickupPoint(point.id, {
               name: data.name,
               address: data.address,
               notes: data.notes,
               isActive: form.isActive.checked,
+              mpAccountId: data.mpAccountId,
             }),
         });
 

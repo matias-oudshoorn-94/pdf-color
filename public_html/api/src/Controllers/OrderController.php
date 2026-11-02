@@ -10,6 +10,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Validator;
 use App\Models\FileRecord;
+use App\Models\MpAccount;
 use App\Models\Order;
 use App\Models\PendingOrder;
 use App\Models\PickupPoint;
@@ -43,6 +44,7 @@ final class OrderController
 
         $deliveryAddress = null;
         $pickupPointId = null;
+        $pickupPoint = null;
         $shippingPrice = 0.0;
 
         if ($data['deliveryMethod'] === 'envio') {
@@ -142,6 +144,10 @@ final class OrderController
         // pedido fantasma si el cliente no llega a pagar.
         $total = round(array_sum(array_column($items, 'total_price')) + $shippingPrice, 2);
 
+        // Cada punto de retiro puede cobrar en su propia cuenta; el envío, en la principal.
+        // Se guarda con la intención: el pago después solo se puede verificar con esa cuenta.
+        $mpAccountId = MpAccount::forCheckout($pickupPoint);
+
         $pending = PendingOrder::create(Auth::id(), [
             'notes' => $data['notes'],
             'deliveryMethod' => $data['deliveryMethod'],
@@ -149,13 +155,14 @@ final class OrderController
             'pickupPointId' => $pickupPointId,
             'shippingPrice' => $shippingPrice,
             'items' => $items,
+            'mpAccountId' => $mpAccountId,
         ]);
 
         $preference = MercadoPago::createPreference([
             'id' => 'pending-' . $pending['id'],
             'total' => $total,
             'customer_email' => Auth::user()['email'],
-        ]);
+        ], $mpAccountId);
 
         PendingOrder::setPreference($pending['id'], $preference['id']);
 
@@ -211,7 +218,10 @@ final class OrderController
         }
 
         // El webhook es el camino rápido; esto es el respaldo si todavía no llegó.
-        $payment = MercadoPago::findPaymentByExternalReference('pending-' . $id);
+        $payment = MercadoPago::findPaymentByExternalReference(
+            'pending-' . $id,
+            PendingOrder::mpAccountId($pending),
+        );
 
         if ($payment !== null && ($payment['status'] ?? '') === 'approved') {
             $order = Order::createFromPending(

@@ -24,12 +24,14 @@ final class Order
     private const SELECT = 'SELECT o.id, o.user_id, o.status, o.notes, o.delivery_method, o.delivery_address,
                                    o.pickup_point_id, o.shipping_price,
                                    o.payment_method, o.payment_status, o.mp_preference_id, o.mp_payment_id, o.mp_status_detail,
+                                   o.mp_account_id, mpa.name AS mp_account_name,
                                    pp.name AS pickup_point_name, pp.address AS pickup_point_address,
                                    o.ready_notified_at, o.created_at, o.updated_at,
                                    u.name AS customer_name, u.email AS customer_email, u.phone AS customer_phone
                             FROM orders o
                             JOIN users u ON u.id = o.user_id
-                            LEFT JOIN pickup_points pp ON pp.id = o.pickup_point_id';
+                            LEFT JOIN pickup_points pp ON pp.id = o.pickup_point_id
+                            LEFT JOIN mp_accounts mpa ON mpa.id = o.mp_account_id';
 
     public static function create(
         int $userId,
@@ -104,6 +106,10 @@ final class Order
         );
 
         self::updatePaymentFromWebhook($order['id'], $paymentId, $status, $statusDetail);
+
+        if (isset($payload['mpAccountId'])) {
+            Database::execute('UPDATE orders SET mp_account_id = ? WHERE id = ?', [(int) $payload['mpAccountId'], $order['id']]);
+        }
 
         return self::find($order['id']);
     }

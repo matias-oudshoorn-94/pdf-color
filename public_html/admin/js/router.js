@@ -7,6 +7,7 @@ import { adminsPage, clientsPage } from './controllers/users.controller.js';
 import { careersPage, institutionsPage, locationsPage, subjectsPage, yearsPage } from './controllers/taxonomy.controller.js';
 import { pickupPointsPage, priceTiersPage } from './controllers/checkout.controller.js';
 import { messagesPage } from './controllers/messages.controller.js';
+import { mpAccountsPage } from './controllers/mp-accounts.controller.js';
 import { settingsPage } from './controllers/settings.controller.js';
 
 /**
@@ -19,6 +20,7 @@ export const SECTIONS = [
   { path: '/admin/precios', label: 'Precios', page: settingsPage },
   { path: '/admin/precios-por-cantidad', label: 'Precios por cantidad', page: priceTiersPage },
   { path: '/admin/puntos-retiro', label: 'Puntos de retiro', page: pickupPointsPage },
+  { path: '/admin/mercadopago', label: 'Cuentas de Mercado Pago', page: mpAccountsPage },
   { path: '/admin/pedidos', label: 'Pedidos', page: ordersPage, alert: 'pendingOrders', alertTitle: 'pedidos nuevos' },
   { path: '/admin/archivos', label: 'Archivos', page: filesPage },
   { path: '/admin/localidades', label: 'Localidades', page: locationsPage },

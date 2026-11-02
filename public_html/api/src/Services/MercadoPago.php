@@ -6,14 +6,21 @@ namespace App\Services;
 
 use App\Core\Config;
 use App\Core\HttpException;
+use App\Models\MpAccount;
 
-/** Integración con Mercado Pago Checkout Pro: crear preferencias y consultar pagos. */
+/**
+ * Integración con Mercado Pago Checkout Pro: crear preferencias y consultar pagos.
+ *
+ * Puede haber varias cuentas (ver MpAccount): cada método recibe el id de la cuenta
+ * con la que opera ($accountId null = token de config.php). Un pago solo se puede
+ * consultar con el token de la cuenta que lo cobró.
+ */
 final class MercadoPago
 {
     private const API_BASE = 'https://api.mercadopago.com';
 
     /** Crea la preferencia de pago y devuelve ['id' => preferenceId, 'init_point' => url de pago]. */
-    public static function createPreference(array $order): array
+    public static function createPreference(array $order, ?int $accountId): array
     {
         $appUrl = Config::appUrl();
         $returnUrl = $appUrl . '/pedido/resultado';
@@ -32,7 +39,9 @@ final class MercadoPago
                 'failure' => $returnUrl,
                 'pending' => $returnUrl,
             ],
-            'notification_url' => $appUrl . '/api/webhooks/mercadopago',
+            // El webhook necesita saber en qué cuenta se cobró para poder consultar el pago.
+            'notification_url' => $appUrl . '/api/webhooks/mercadopago'
+                . ($accountId !== null ? '?cuenta=' . $accountId : ''),
         ];
 
         // auto_return exige que back_urls.success sea un dominio público real: Mercado
@@ -42,7 +51,7 @@ final class MercadoPago
             $payload['auto_return'] = 'approved';
         }
 
-        $response = self::request('POST', '/checkout/preferences', $payload);
+        $response = self::request(MpAccount::accessToken($accountId), 'POST', '/checkout/preferences', $payload);
 
         if ($response === null || !isset($response['id'], $response['init_point'])) {
             error_log('[mercadopago] no se pudo crear la preferencia: ' . json_encode($response));
@@ -56,17 +65,18 @@ final class MercadoPago
     }
 
     /** Consulta un pago real contra la API (nunca se confía en lo que manda el webhook). */
-    public static function getPayment(string $paymentId): ?array
+    public static function getPayment(string $paymentId, ?int $accountId): ?array
     {
-        $response = self::request('GET', '/v1/payments/' . rawurlencode($paymentId));
+        $response = self::request(MpAccount::accessToken($accountId), 'GET', '/v1/payments/' . rawurlencode($paymentId));
 
         return is_array($response) && isset($response['id']) ? $response : null;
     }
 
     /** Respaldo por si el webhook todavía no llegó: busca el pago más reciente de esa referencia. */
-    public static function findPaymentByExternalReference(string $externalReference): ?array
+    public static function findPaymentByExternalReference(string $externalReference, ?int $accountId): ?array
     {
         $response = self::request(
+            MpAccount::accessToken($accountId),
             'GET',
             '/v1/payments/search?external_reference=' . rawurlencode($externalReference) . '&sort=date_created&criteria=desc',
         );
@@ -76,12 +86,29 @@ final class MercadoPago
         return is_array($results) && isset($results[0]) ? $results[0] : null;
     }
 
-    private static function request(string $method, string $path, ?array $payload = null): ?array
+    /**
+     * Datos de la cuenta dueña de un access token (para validarlo antes de guardarlo).
+     * Devuelve ['id', 'nickname', 'email'] o null si el token no sirve.
+     */
+    public static function accountForToken(string $accessToken): ?array
     {
-        $accessToken = (string) Config::get('mercadopago.access_token');
+        $response = self::request($accessToken, 'GET', '/users/me');
 
+        if (!is_array($response) || !isset($response['id'])) {
+            return null;
+        }
+
+        return [
+            'id' => (string) $response['id'],
+            'nickname' => isset($response['nickname']) ? (string) $response['nickname'] : null,
+            'email' => isset($response['email']) ? (string) $response['email'] : null,
+        ];
+    }
+
+    private static function request(string $accessToken, string $method, string $path, ?array $payload = null): ?array
+    {
         if ($accessToken === '') {
-            error_log('[mercadopago] falta access_token en la configuración');
+            error_log('[mercadopago] falta el access_token de la cuenta');
 
             return null;
         }
@@ -108,13 +135,11 @@ final class MercadoPago
 
         if ($raw === false) {
             error_log('[mercadopago] ' . curl_error($ch));
-            curl_close($ch);
 
             return null;
         }
 
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         $data = json_decode((string) $raw, true);
 

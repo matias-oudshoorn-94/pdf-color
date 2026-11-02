@@ -12,6 +12,7 @@ use App\Core\Validator;
 use App\Models\Career;
 use App\Models\Institution;
 use App\Models\Location;
+use App\Models\MpAccount;
 use App\Models\PickupPoint;
 use App\Models\PriceTier;
 use App\Models\Subject;
@@ -307,7 +308,7 @@ final class TaxonomyAdminController
         }
 
         Response::json([
-            'pickupPoint' => PickupPoint::create($data['name'], $data['address'], $data['notes'], $data['isActive']),
+            'pickupPoint' => PickupPoint::create($data['name'], $data['address'], $data['notes'], $data['isActive'], $data['mpAccountId']),
         ], 201);
     }
 
@@ -326,7 +327,7 @@ final class TaxonomyAdminController
         }
 
         Response::json([
-            'pickupPoint' => PickupPoint::update($id, $data['name'], $data['address'], $data['notes'], $data['isActive']),
+            'pickupPoint' => PickupPoint::update($id, $data['name'], $data['address'], $data['notes'], $data['isActive'], $data['mpAccountId']),
         ]);
     }
 
@@ -343,12 +344,28 @@ final class TaxonomyAdminController
 
     private function validatePickupPoint(Request $request): array
     {
-        return Validator::make($request->body())
+        $data = Validator::make($request->body())
             ->string('name', 2, 120)
             ->string('address', 5, 300)
             ->string('notes', 0, 300, required: false)
             ->bool('isActive')
             ->validated();
+
+        // Cuenta de Mercado Pago con la que cobra: vacío = la principal.
+        $rawAccount = $request->body()['mpAccountId'] ?? null;
+        $data['mpAccountId'] = null;
+
+        if ($rawAccount !== null && $rawAccount !== '') {
+            $accountId = filter_var($rawAccount, FILTER_VALIDATE_INT);
+
+            if ($accountId === false || !MpAccount::isActive($accountId)) {
+                throw HttpException::badRequest('Elegí una cuenta de Mercado Pago activa', ['mpAccountId' => ['Cuenta inválida']]);
+            }
+
+            $data['mpAccountId'] = $accountId;
+        }
+
+        return $data;
     }
 
     // ---------- Precios por cantidad ----------

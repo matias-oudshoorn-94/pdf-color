@@ -72,12 +72,9 @@ final class Recaptcha
 
         if ($raw === false) {
             error_log('[recaptcha] ' . curl_error($ch));
-            curl_close($ch);
 
             return ['success' => false];
         }
-
-        curl_close($ch);
 
         $data = json_decode((string) $raw, true);
 

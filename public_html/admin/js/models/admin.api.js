@@ -75,6 +75,13 @@ export const AdminApi = {
   updatePickupPoint: (id, payload) => api.patch(`/admin/pickup-points/${id}`, payload),
   deletePickupPoint: (id) => api.delete(`/admin/pickup-points/${id}`),
 
+  mpAccounts: () => api.get('/admin/mp-accounts'),
+  createMpAccount: (payload) => api.post('/admin/mp-accounts', payload),
+  updateMpAccount: (id, payload) => api.patch(`/admin/mp-accounts/${id}`, payload),
+  makeDefaultMpAccount: (id) => api.post(`/admin/mp-accounts/${id}/default`, {}),
+  archiveMpAccount: (id) => api.post(`/admin/mp-accounts/${id}/archive`, {}),
+  restoreMpAccount: (id) => api.post(`/admin/mp-accounts/${id}/restore`, {}),
+
   priceTiers: () => api.get('/admin/price-tiers'),
   createPriceTier: (payload) => api.post('/admin/price-tiers', payload),
   updatePriceTier: (id, payload) => api.patch(`/admin/price-tiers/${id}`, payload),
