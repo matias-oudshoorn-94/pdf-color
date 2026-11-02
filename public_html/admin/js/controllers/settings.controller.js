@@ -4,7 +4,7 @@ import { toastErr, toastOk } from '/js/lib/toast.js';
 
 export function settingsPage() {
   return {
-    title: 'Precios',
+    title: 'Recargos y envío',
     html: '<div id="content"><div class="skeleton" style="height:200px"></div></div>',
     async mount(root) {
       const content = root.querySelector('#content');

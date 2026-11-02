@@ -248,7 +248,7 @@ export function priceTiersPage() {
           <p class="muted" style="max-width:760px;margin-bottom:16px">
             Cada archivo del pedido se cobra según su faz y su cantidad de páginas (páginas del archivo × copias):
             todas sus páginas van al precio del rango en que cae. Color o blanco y negro cuestan lo mismo.
-            El anillado y el envío se suman aparte (ver "Precios").
+            El anillado y el envío se suman aparte (ver "Recargos y envío").
           </p>
           <div class="grid grid--split">
             ${sideCard('doble', priceTiers.doble)}

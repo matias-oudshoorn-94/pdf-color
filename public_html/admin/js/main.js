@@ -4,28 +4,80 @@ import { esc } from '/js/lib/dom.js';
 import { toastErr } from '/js/lib/toast.js';
 import { loginScreen } from './controllers/login.controller.js';
 import { AdminApi } from './models/admin.api.js';
-import { SECTIONS, navigate, onNavigate, resolve } from './router.js';
+import { NAV_GROUPS, SECTIONS, navigate, onNavigate, resolve } from './router.js';
+import { ICONS } from './views/icons.view.js';
 
 const app = document.getElementById('app');
 
+// Desplegables abiertos a mano, para que sigan abiertos al cambiar de sección.
+// El grupo de la sección actual se abre siempre.
+const OPEN_GROUPS_KEY = 'pdfcolor.admin.openGroups';
+
+function readOpenGroups() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(OPEN_GROUPS_KEY) ?? '[]'));
+  } catch {
+    return new Set();
+  }
+}
+
+function saveOpenGroups(ids) {
+  try {
+    localStorage.setItem(OPEN_GROUPS_KEY, JSON.stringify([...ids]));
+  } catch {
+    // Sin localStorage (modo privado): los desplegables simplemente no se recuerdan.
+  }
+}
+
+// En el celular el menú se abre con un botón; queda abierto hasta elegir una sección.
+let mobileMenuOpen = false;
+
+function navLink(section, activePath, { child = false } = {}) {
+  return `
+    <a class="sidebar__link ${child ? 'sidebar__link--child' : ''}" href="${section.path}" data-link
+       ${section.path === activePath ? 'aria-current="page"' : ''}>
+      ${child ? '' : ICONS[section.icon] ?? ''}
+      <span class="sidebar__label">${section.label}</span>
+      ${section.alert ? `<span class="sidebar__count sidebar__count--alert" data-alert="${section.alert}" hidden></span>` : ''}
+    </a>`;
+}
+
+function navGroup(group, activePath, openGroups) {
+  const sections = SECTIONS.filter((section) => section.group === group.id);
+  const hasActive = sections.some((section) => section.path === activePath);
+
+  return `
+    <details class="sidebar__group" data-group="${group.id}" ${hasActive || openGroups.has(group.id) ? 'open' : ''}>
+      <summary class="sidebar__link sidebar__group-head ${hasActive ? 'has-active' : ''}">
+        ${ICONS[group.icon]}
+        <span class="sidebar__label">${group.label}</span>
+        <span class="sidebar__chevron">${ICONS.chevron}</span>
+      </summary>
+      <div class="sidebar__group-items">
+        ${sections.map((section) => navLink(section, activePath, { child: true })).join('')}
+      </div>
+    </details>`;
+}
+
 function shell(user, activePath) {
+  const openGroups = readOpenGroups();
+  const activeSection = SECTIONS.find((section) => section.path === activePath);
+
   return `
     <div class="admin-shell">
-      <aside class="sidebar">
+      <aside class="sidebar ${mobileMenuOpen ? 'is-open' : ''}">
         <div class="sidebar__brand">
           ${logoMark({ size: 44 })}
           <span class="sidebar__tag">Panel de administración</span>
+          <button class="btn btn--sm sidebar__toggle" id="menu-toggle" type="button" aria-expanded="${mobileMenuOpen}">
+            ${ICONS.menu} ${activeSection ? activeSection.label : 'Menú'}
+          </button>
         </div>
 
         <nav class="sidebar__nav">
-          ${SECTIONS.map(
-            (section) => `
-              <a class="sidebar__link" href="${section.path}" data-link
-                 ${section.path === activePath ? 'aria-current="page"' : ''}>
-                <span>${section.label}</span>
-                ${section.alert ? `<span class="sidebar__count sidebar__count--alert" data-alert="${section.alert}" hidden></span>` : ''}
-              </a>`,
-          ).join('')}
+          ${SECTIONS.filter((section) => !section.group).map((section) => navLink(section, activePath)).join('')}
+          <div class="sidebar__divider"></div>
+          ${NAV_GROUPS.map((group) => navGroup(group, activePath, openGroups)).join('')}
         </nav>
 
         <div class="sidebar__footer">
@@ -121,9 +173,27 @@ function paint() {
   for (const link of app.querySelectorAll('[data-link]')) {
     link.addEventListener('click', (event) => {
       event.preventDefault();
+      mobileMenuOpen = false;
       navigate(link.getAttribute('href'));
     });
   }
+
+  for (const group of app.querySelectorAll('[data-group]')) {
+    group.addEventListener('toggle', () => {
+      const openGroups = readOpenGroups();
+
+      if (group.open) openGroups.add(group.dataset.group);
+      else openGroups.delete(group.dataset.group);
+
+      saveOpenGroups(openGroups);
+    });
+  }
+
+  app.querySelector('#menu-toggle').addEventListener('click', (event) => {
+    mobileMenuOpen = !mobileMenuOpen;
+    app.querySelector('.sidebar').classList.toggle('is-open', mobileMenuOpen);
+    event.currentTarget.setAttribute('aria-expanded', String(mobileMenuOpen));
+  });
 
   app.querySelector('#logout').addEventListener('click', async () => {
     try {

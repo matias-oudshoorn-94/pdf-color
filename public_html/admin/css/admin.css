@@ -71,14 +71,17 @@
 .sidebar__nav {
   display: grid;
   gap: 2px;
+  min-height: 0;
+  overflow-y: auto;
+  margin-inline: -4px;
+  padding-inline: 4px;
 }
 
 .sidebar__link {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: 10px;
   color: var(--text-2);
   font-size: 0.9rem;
@@ -95,6 +98,75 @@
 .sidebar__link[aria-current='page'] {
   background: var(--surface-3);
   color: var(--text);
+}
+
+.sidebar__label {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-icon {
+  flex-shrink: 0;
+  color: var(--text-3);
+  transition: color var(--t-fast);
+}
+
+.sidebar__link:hover .nav-icon,
+.sidebar__link[aria-current='page'] .nav-icon,
+.sidebar__group-head.has-active .nav-icon {
+  color: var(--text);
+}
+
+.sidebar__divider {
+  height: 1px;
+  margin: 8px 12px;
+  background: var(--line);
+}
+
+/* Desplegables (<details>): cabecera con flecha que gira al abrir. */
+.sidebar__group-head {
+  list-style: none;
+  user-select: none;
+}
+
+.sidebar__group-head::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar__group-head.has-active {
+  color: var(--text);
+}
+
+.sidebar__chevron {
+  display: grid;
+  transition: transform var(--t-fast);
+}
+
+.sidebar__chevron .nav-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.sidebar__group[open] .sidebar__chevron {
+  transform: rotate(90deg);
+}
+
+.sidebar__group-items {
+  display: grid;
+  gap: 1px;
+  margin: 2px 0 6px 21px;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+
+.sidebar__link--child {
+  padding-block: 7px;
+  font-size: 0.86rem;
+}
+
+/* Botón "Menú": solo en celular. */
+.sidebar__toggle {
+  display: none;
 }
 
 .sidebar__count {
@@ -610,11 +682,24 @@ a.attention:focus-visible {
     border-bottom: 1px solid var(--line);
   }
 
-  .sidebar__nav {
-    grid-auto-flow: column;
-    grid-auto-columns: max-content;
-    overflow-x: auto;
-    padding-bottom: 4px;
+  .sidebar {
+    gap: 14px;
+    padding-block: 14px;
+  }
+
+  .sidebar__tag {
+    display: none;
+  }
+
+  .sidebar__toggle {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  /* Cerrado solo se ve la barra con el logo y el botón; abierto, el menú completo. */
+  .sidebar:not(.is-open) .sidebar__nav,
+  .sidebar:not(.is-open) .sidebar__footer {
+    display: none;
   }
 
   .sidebar__footer {
