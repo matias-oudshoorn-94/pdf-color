@@ -1,6 +1,7 @@
 import { logoMark } from '../views/logo.view.js';
 import { ContactModel } from '../models/resources.js';
 import { mountPickupMap } from '../views/pickup-map.view.js';
+import { SHIPPING_ENABLED } from '../lib/features.js';
 import { esc } from '../lib/dom.js';
 import { toastErr, toastOk } from '../lib/toast.js';
 
@@ -13,7 +14,7 @@ export function aboutPage() {
           <h1>Una imprenta con oficio, ahora online.</h1>
           <p class="hero__lead">
             Somos la imprenta de Mar del Plata que combina equipos profesionales de gran formato
-            con un flujo 100% digital: subís tu archivo, elegís cómo lo querés, los pasás a buscar o te lo enviamos a tu hogar.
+            con un flujo 100% digital: subís tu archivo, elegís cómo lo querés, los pasás a buscar${SHIPPING_ENABLED ? ' o te lo enviamos a tu hogar' : ' por la sucursal que te quede más cómoda'}.
           </p>
         </div>
 

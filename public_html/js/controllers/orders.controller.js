@@ -10,6 +10,7 @@ import { itemTotal, pricePerPage, ringCharge } from '../lib/pricing.js';
 import { paintThumbnail } from '../lib/thumbnail.js';
 import { getRecaptchaToken, recaptchaDisclaimer } from '../lib/recaptcha.js';
 import { attachAddressAutocomplete } from '../lib/google.js';
+import { SHIPPING_ENABLED } from '../lib/features.js';
 
 // "Pagar en el local" está oculto por ahora: solo Mercado Pago. Poner en true para volver a ofrecerlo.
 const PAY_IN_STORE_ENABLED = false;
@@ -252,15 +253,20 @@ export function cartPage() {
           ${deliveryMethod === 'envio' && shippingPrice > 0 ? `<p class="muted">Envío: ${formatMoney(shippingPrice)}</p>` : ''}
           <p class="checkout-total">Total: <strong>${formatMoney(orderTotal())}</strong></p>
           <div class="checkout-section">
-            <h4 class="checkout-section__title">Entrega</h4>
-            <div class="delivery-toggle">
-              <button type="button" class="delivery-toggle__btn ${deliveryMethod === 'retiro' ? 'is-selected' : ''}" data-delivery="retiro">
-                ${storeIcon} Retiro en sucursal
-              </button>
-              <button type="button" class="delivery-toggle__btn ${deliveryMethod === 'envio' ? 'is-selected' : ''}" data-delivery="envio">
-                ${truckIcon} Envío a domicilio
-              </button>
-            </div>
+            <h4 class="checkout-section__title">${SHIPPING_ENABLED ? 'Entrega' : 'Retiro en sucursal'}</h4>
+            ${
+              // Sin envío a domicilio no hay nada que elegir: solo se muestran los puntos de retiro.
+              SHIPPING_ENABLED
+                ? `<div class="delivery-toggle">
+                     <button type="button" class="delivery-toggle__btn ${deliveryMethod === 'retiro' ? 'is-selected' : ''}" data-delivery="retiro">
+                       ${storeIcon} Retiro en sucursal
+                     </button>
+                     <button type="button" class="delivery-toggle__btn ${deliveryMethod === 'envio' ? 'is-selected' : ''}" data-delivery="envio">
+                       ${truckIcon} Envío a domicilio
+                     </button>
+                   </div>`
+                : ''
+            }
             <div id="pickup-fields" ${deliveryMethod === 'retiro' ? '' : 'hidden'}>
               <div class="field">
                 <span class="field__label">Punto de retiro</span>

@@ -1,6 +1,7 @@
 import { SettingsModel, TaxonomyModel } from '../models/resources.js';
 import { formatMoney } from '../lib/format.js';
 import { itemTotal, pricePerPage, ringCharge } from '../lib/pricing.js';
+import { SHIPPING_ENABLED } from '../lib/features.js';
 
 /**
  * Calculador de precios: estima cuánto sale imprimir sin tener que subir un archivo.
@@ -153,7 +154,7 @@ export function calculatorPage() {
               ${state.finish === 'anillado' ? `<div><dt>Anillado</dt><dd>${formatMoney(ring)}</dd></div>` : ''}
             </dl>
             <p class="muted calculator-result__note">
-              Es un estimado para 1 copia, sin envío. El tamaño de hoja (${state.paperSize === 'A4' ? 'A4' : 'oficio'}) no cambia el precio.
+              Es un estimado para 1 copia${SHIPPING_ENABLED ? ', sin envío' : ''}. El tamaño de hoja (${state.paperSize === 'A4' ? 'A4' : 'oficio'}) no cambia el precio.
             </p>
             <a class="btn btn--primary btn--block" href="/subir" data-link>Subir mi archivo</a>
           </article>
