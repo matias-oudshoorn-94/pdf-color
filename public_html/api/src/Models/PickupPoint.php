@@ -21,7 +21,7 @@ final class PickupPoint
     {
         [$where, $params] = self::filters($search);
 
-        $sql = "SELECT p.id, p.name, p.address, p.notes, p.is_active, p.created_at,
+        $sql = "SELECT p.id, p.name, p.address, p.notes, p.is_active, p.is_default, p.created_at,
                        p.mp_account_id, a.name AS mp_account_name,
                        (SELECT COUNT(*) FROM orders o WHERE o.pickup_point_id = p.id) AS orders_count
                 FROM pickup_points p
@@ -48,11 +48,11 @@ final class PickupPoint
         return ['WHERE p.name LIKE :search', ['search' => '%' . $search . '%']];
     }
 
-    /** Puntos activos para el selector público del checkout. */
+    /** Puntos activos para el selector público del checkout: el predeterminado primero. */
     public static function active(): array
     {
         return Database::select(
-            'SELECT id, name, address, notes FROM pickup_points WHERE is_active = 1 ORDER BY name',
+            'SELECT id, name, address, notes, is_default FROM pickup_points WHERE is_active = 1 ORDER BY is_default DESC, name',
         );
     }
 
@@ -62,24 +62,38 @@ final class PickupPoint
     }
 
     /** $mpAccountId: cuenta de Mercado Pago con la que cobra (null = la principal). */
-    public static function create(string $name, string $address, ?string $notes, bool $isActive, ?int $mpAccountId): array
+    public static function create(string $name, string $address, ?string $notes, bool $isActive, ?int $mpAccountId, bool $isDefault): array
     {
         $id = Database::insert(
             'INSERT INTO pickup_points (name, address, notes, is_active, mp_account_id) VALUES (?, ?, ?, ?, ?)',
             [$name, $address, $notes, (int) $isActive, $mpAccountId],
         );
 
+        self::setDefault($id, $isDefault);
+
         return self::find($id);
     }
 
-    public static function update(int $id, string $name, string $address, ?string $notes, bool $isActive, ?int $mpAccountId): ?array
+    public static function update(int $id, string $name, string $address, ?string $notes, bool $isActive, ?int $mpAccountId, bool $isDefault): ?array
     {
         Database::execute(
             'UPDATE pickup_points SET name = ?, address = ?, notes = ?, is_active = ?, mp_account_id = ? WHERE id = ?',
             [$name, $address, $notes, (int) $isActive, $mpAccountId, $id],
         );
 
+        self::setDefault($id, $isDefault);
+
         return self::find($id);
+    }
+
+    /** Marca (o desmarca) el punto como predeterminado. Solo puede haber uno: marcarlo desmarca el resto. */
+    private static function setDefault(int $id, bool $isDefault): void
+    {
+        if ($isDefault) {
+            Database::execute('UPDATE pickup_points SET is_default = (id = ?)', [$id]);
+        } else {
+            Database::execute('UPDATE pickup_points SET is_default = 0 WHERE id = ?', [$id]);
+        }
     }
 
     public static function delete(int $id): void

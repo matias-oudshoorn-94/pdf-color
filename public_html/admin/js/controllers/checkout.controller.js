@@ -63,6 +63,10 @@ export function pickupPointsPage() {
       <input type="checkbox" name="isActive" ${point.id === undefined || Number(point.is_active) ? 'checked' : ''} />
       Activo (visible para elegir en el checkout)
     </label>
+    <label class="checkbox">
+      <input type="checkbox" name="isDefault" ${Number(point.is_default) ? 'checked' : ''} />
+      Predeterminado: viene elegido en el checkout y se muestra primero
+    </label>
     ${mpAccountField(point, accounts)}
   `;
 
@@ -93,6 +97,7 @@ export function pickupPointsPage() {
               address: data.address,
               notes: data.notes,
               isActive: form.isActive.checked,
+              isDefault: form.isDefault.checked,
               mpAccountId: data.mpAccountId,
             }),
         });
@@ -106,7 +111,7 @@ export function pickupPointsPage() {
     fetch: (params) => AdminApi.pickupPoints(params),
     deleteOne: (id) => AdminApi.deletePickupPoint(id),
     renderRow: (point) => `
-      <td>${esc(point.name)}</td>
+      <td>${esc(point.name)}${Number(point.is_default) ? ' <span class="badge badge--sales">Predeterminado</span>' : ''}</td>
       <td>${esc(point.address)}</td>
       <td>${Number(point.is_active) ? '<span class="badge badge--sales">Activo</span>' : '<span class="muted">Inactivo</span>'}</td>
       <td>${point.mp_account_name ? esc(point.mp_account_name) : '<span class="muted">Principal</span>'}</td>
@@ -129,6 +134,7 @@ export function pickupPointsPage() {
               address: data.address,
               notes: data.notes,
               isActive: form.isActive.checked,
+              isDefault: form.isDefault.checked,
               mpAccountId: data.mpAccountId,
             }),
         });

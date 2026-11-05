@@ -144,6 +144,7 @@ CREATE TABLE IF NOT EXISTS mp_accounts (
 -- Puntos de retiro: lista libre administrable, con dirección para mostrar el
 -- mapa de Google en el checkout cuando se elige "retiro en sucursal".
 -- mp_account_id: con qué cuenta de Mercado Pago cobra (NULL = la principal).
+-- is_default: viene elegido en el checkout y se muestra primero (solo uno a la vez).
 CREATE TABLE IF NOT EXISTS pickup_points (
   id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name          VARCHAR(120) NOT NULL,
@@ -151,6 +152,7 @@ CREATE TABLE IF NOT EXISTS pickup_points (
   notes         VARCHAR(300) NULL,
   mp_account_id INT UNSIGNED NULL,
   is_active     TINYINT(1) NOT NULL DEFAULT 1,
+  is_default    TINYINT(1) NOT NULL DEFAULT 0,
   created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT fk_pickup_points_mp_account FOREIGN KEY (mp_account_id) REFERENCES mp_accounts (id) ON DELETE SET NULL

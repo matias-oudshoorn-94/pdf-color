@@ -308,7 +308,7 @@ final class TaxonomyAdminController
         }
 
         Response::json([
-            'pickupPoint' => PickupPoint::create($data['name'], $data['address'], $data['notes'], $data['isActive'], $data['mpAccountId']),
+            'pickupPoint' => PickupPoint::create($data['name'], $data['address'], $data['notes'], $data['isActive'], $data['mpAccountId'], $data['isDefault']),
         ], 201);
     }
 
@@ -327,7 +327,7 @@ final class TaxonomyAdminController
         }
 
         Response::json([
-            'pickupPoint' => PickupPoint::update($id, $data['name'], $data['address'], $data['notes'], $data['isActive'], $data['mpAccountId']),
+            'pickupPoint' => PickupPoint::update($id, $data['name'], $data['address'], $data['notes'], $data['isActive'], $data['mpAccountId'], $data['isDefault']),
         ]);
     }
 
@@ -349,7 +349,12 @@ final class TaxonomyAdminController
             ->string('address', 5, 300)
             ->string('notes', 0, 300, required: false)
             ->bool('isActive')
+            ->bool('isDefault')
             ->validated();
+
+        if ($data['isDefault'] && !$data['isActive']) {
+            throw HttpException::badRequest('Un punto inactivo no puede ser el predeterminado: activalo o desmarcá "Predeterminado"');
+        }
 
         // Cuenta de Mercado Pago con la que cobra: vacío = la principal.
         $rawAccount = $request->body()['mpAccountId'] ?? null;

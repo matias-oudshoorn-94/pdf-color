@@ -186,6 +186,9 @@ export function cartPage() {
         pickupPoints = [];
       }
 
+      // El punto predeterminado (se marca en el admin) ya viene elegido; el cliente puede cambiarlo.
+      pickupPointId = String(pickupPoints.find((point) => Number(point.is_default))?.id ?? '');
+
       try {
         ({ priceTiers } = await TaxonomyModel.priceTiers());
       } catch {
